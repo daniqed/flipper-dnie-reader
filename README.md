@@ -42,6 +42,7 @@ La carpeta `tests/` contiene pruebas en PC, con vectores oficiales siempre que e
 - **CMAC**: RFC 4493.
 - **Decodificador JPEG2000**: comparado con OpenJPEG.
 - **SOD, firma RSA, Chip Authentication, MRZ y registros guardados.**
+- **Cadena CSCA SPAIN**: con certificados reales y públicos de la Policía.
 
 Consulta `tests/README.md`.
 
@@ -60,12 +61,13 @@ Consulta `tests/README.md`.
 | `dnie_lds.c`, `dnie_mrz.c` | Lectura de ficheros del chip, parser de la MRZ |
 | `dnie_j2k.c`, `dnie_pixelart.c` | Decodificador JPEG2000 reducido, pixel art |
 | `dnie_sod.c`, `dnie_pa.c`, `dnie_dg14.c`, `dnie_ca.c` | Autenticidad: SOD, firma, Chip Authentication |
+| `dnie_csca.c`, `dnie_csca_keys.inc` | Cadena de confianza: certificado DS firmado por CSCA SPAIN (claves públicas de la Master List del BSI) |
 | `dnie_store.c`, `dnie_record.c` | Lecturas guardadas cifradas |
 | `scenes/` | Pantallas de la app |
 
 ## Pendiente
 
-- Verificar el certificado DS contra la CSCA de España (cadena de confianza completa).
+- Pantalla de aviso a pantalla completa si el documento no es auténtico.
 - Pasaporte español (clave a partir de la MRZ).
 
 ## Licencia

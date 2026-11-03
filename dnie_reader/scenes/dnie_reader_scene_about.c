@@ -7,7 +7,7 @@ void dnie_scene_about_on_enter(void* context) {
 
     widget_reset(widget);
     widget_add_string_element(
-        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "DNIe Reader v0.12");
+        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "DNIe Reader v0.13");
     widget_add_string_multiline_element(
         widget,
         64,

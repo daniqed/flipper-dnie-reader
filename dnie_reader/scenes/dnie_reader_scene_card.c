@@ -248,9 +248,11 @@ static void card_draw(Canvas* canvas, void* model) {
         if(!app->viewing_saved) {
             bool bad = dnie_auth_integrity_failed(&app->auth) ||
                        app->auth.ca.result == DnieCaFailed ||
-                       app->auth.pa.result == DniePaBadSignature;
+                       app->auth.pa.result == DniePaBadSignature ||
+                       app->auth.csca.result == DnieCscaBadSignature;
             const char* badge = dnie_auth_integrity_failed(&app->auth)  ? "ALTER" :
                                 app->auth.pa.result == DniePaBadSignature ? "FIRMA!" :
+                                app->auth.csca.result == DnieCscaBadSignature ? "CSCA!" :
                                 app->auth.ca.result == DnieCaFailed      ? "CA FALLA" :
                                 dnie_auth_all_ok(&app->auth)              ? "ORIGINAL" :
                                 dnie_auth_integrity_ok(&app->auth)        ? "SOD OK" :

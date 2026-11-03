@@ -6,7 +6,7 @@ App(
     stack_size=6 * 1024,  # el decodificador JPEG2000 corre en este hilo
     fap_category="NFC",
     fap_author="Dani",
-    fap_version="0.12",
+    fap_version="0.13",
     fap_icon="dnie_10px.png",
     fap_description="Lector del DNIe espanol (PACE con CAN). PACE + Secure Messaging: pixel art, album, lecturas cifradas y deteccion de clones.",
     fap_libs=["mbedtls"],  # SHA-1, AES y ECP del SDK

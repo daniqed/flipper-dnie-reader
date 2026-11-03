@@ -62,3 +62,6 @@ con ChipAuthenticationInfo/PublicKeyInfo. Necesita `pip install asn1crypto crypt
   SHA-256, firma alterada y atributos firmados alterados. Vectores en `gen_sod_vectors.py`.
 - `test_ca.c`: Chip Authentication con un chip simulado: mismas claves en ambos lados y un
   "clon" sin la clave privada no supera el MAC del canal nuevo.
+- `test_csca.c`: cadena CSCA SPAIN con certificados reales y publicos (Master List del BSI):
+  el certificado enlace de la CSCA 4 firmado por la CSCA 3 (RSA-4096 + SHA-256), los
+  autofirmados, uno manipulado y uno con emisor desconocido.

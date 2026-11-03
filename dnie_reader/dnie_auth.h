@@ -8,6 +8,7 @@
 #include "dnie_sod.h"
 #include "dnie_dg14.h"
 #include "dnie_pa.h"
+#include "dnie_csca.h"
 #include "dnie_ca.h"
 
 #define DNIE_FID_SOD 0x011D
@@ -41,6 +42,7 @@ typedef struct {
 
     // Firma del SOD (Passive Authentication) y Chip Authentication
     DniePaInfo pa;
+    DnieCscaInfo csca; // certificado DS emitido por CSCA SPAIN
     DnieCaStatus ca;
 
     // Resumen para la pantalla (sobrevive a dnie_auth_compact)

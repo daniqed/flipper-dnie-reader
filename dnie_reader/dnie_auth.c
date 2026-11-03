@@ -109,6 +109,17 @@ void dnie_auth_read(
     }
     FURI_LOG_I(TAG, "Firma SOD: %d (%u bits) en %lu ms", a->pa.result, a->pa.key_bits, furi_get_tick() - t0);
 
+    // Cadena: el certificado DS tiene que estar firmado por una CSCA SPAIN (RSA-4096)
+    if(a->sod->has_cert) {
+        t0 = furi_get_tick();
+        if(memmgr_get_free_heap() > 16384 && memmgr_heap_get_max_free_block() > 6144) {
+            dnie_csca_verify_cert(&a->sod->cert, &a->csca);
+        } else {
+            a->csca.result = DnieCscaNoMemory;
+        }
+        FURI_LOG_I(TAG, "Cadena CSCA: %d en %lu ms", a->csca.result, furi_get_tick() - t0);
+    }
+
     a->dg1 = check_hash(a->sod, 1, dg1, dg1_len);
     if(a->dg14_ok) a->dg14_hash = check_hash(a->sod, 14, a->dg14_buf, a->dg14_len);
     if(!dnie_hash_supported(a->sod->signer_hash)) {
@@ -160,7 +171,8 @@ void dnie_auth_compact(DnieAuth* a) {
 }
 
 bool dnie_auth_all_ok(const DnieAuth* a) {
-    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk && a->ca.result == DnieCaOk;
+    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk &&
+           a->csca.result == DnieCscaOk && a->ca.result == DnieCaOk;
 }
 
 bool dnie_auth_integrity_failed(const DnieAuth* a) {

@@ -45,10 +45,12 @@ static void cat_auth(DnieApp* app, FuriString* text) {
     } else {
         if(dnie_auth_integrity_failed(a)) {
             furi_string_cat_str(text, "!! DATOS ALTERADOS !!\n");
+        } else if(a->csca.result == DnieCscaBadSignature) {
+            furi_string_cat_str(text, "!! CERTIFICADO DS\nNO FIRMADO POR\nCSCA SPAIN !!\n");
         } else if(a->ca.result == DnieCaFailed) {
             furi_string_cat_str(text, "!! CHIP AUTH FALLA !!\n");
         } else if(dnie_auth_all_ok(a)) {
-            furi_string_cat_str(text, "DOCUMENTO ORIGINAL\n(hashes + firma +\nchip autentico)\n");
+            furi_string_cat_str(text, "DOCUMENTO ORIGINAL\n(hashes + firma +\nCSCA SPAIN + chip)\n");
         } else if(dnie_auth_integrity_ok(a)) {
             furi_string_cat_str(text, "Hashes del SOD: OK\n");
         }
@@ -73,6 +75,8 @@ static void cat_auth(DnieApp* app, FuriString* text) {
         furi_string_cat_printf(text, ", %s\n", dnie_hash_name(a->pa.hash));
         if(a->has_cert) {
             furi_string_cat_printf(text, "DS: %s\nEmisor: %s\n", a->ds_subject_cn, a->ds_issuer_cn);
+            furi_string_cat_printf(text, "Cadena CSCA: %s\n", dnie_csca_result_str(a->csca.result));
+            if(a->csca.csca_name) furi_string_cat_printf(text, "(%s)\n", a->csca.csca_name);
         }
     }
 
@@ -90,10 +94,6 @@ static void cat_auth(DnieApp* app, FuriString* text) {
     if(a->ca.result == DnieCaFailed) {
         furi_string_cat_str(
             text, "El chip no demostro\ntener la clave de\nDG14: clon o fallo\nde la app.\n");
-    }
-    if(a->pa.result == DniePaOk) {
-        furi_string_cat_str(
-            text, "Pendiente: comprobar\nque el DS lo emitio\nCSCA SPAIN.\n");
     }
     furi_string_cat_str(text, "\nDG14:\n");
     if(!a->dg14_ok) {
