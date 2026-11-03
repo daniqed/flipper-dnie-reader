@@ -1,4 +1,5 @@
 #include "dnie_reader.h"
+#include "dnie_sounds.h"
 #include "scenes/dnie_reader_scene.h"
 
 #include <furi_hal_rtc.h>
@@ -81,6 +82,10 @@ static void dnie_app_free(DnieApp* app) {
     view_dispatcher_free(app->view_dispatcher);
 
     nfc_free(app->nfc);
+    // La cola de notificaciones va en orden: esto espera a que acabe la melodia que
+    // pueda estar sonando antes de liberar su memoria
+    notification_message_block(app->notifications, &sequence_reset_sound);
+    dnie_sounds_free();
     furi_record_close(RECORD_NOTIFICATION);
     memset(app, 0, sizeof(DnieApp)); // borra datos personales y claves de la RAM
     free(app);

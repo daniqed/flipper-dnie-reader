@@ -206,7 +206,13 @@ static void cat_photo(DnieApp* app, FuriString* text) {
 static void cat_technical(DnieApp* app, FuriString* text) {
     furi_string_cat_printf(
         text,
-        "\n\e#Detalles tecnicos\nPACE %s %s\n%s\nCripto ECC: %lu.%lu s\n",
+        "\n\e#Detalles tecnicos\nChip ISO14443-%s\nAcceso: %s\n",
+        app->protocol == NfcProtocolIso14443_4a ? "4A" : "4B",
+        app->used_bac ? "BAC (3DES)" : (app->passport ? "PACE con MRZ" : "PACE con CAN"));
+    if(app->used_bac) return;
+    furi_string_cat_printf(
+        text,
+        "PACE %s %s\n%s\nCripto ECC: %lu.%lu s\n",
         dnie_pace_mapping_str(app->pace.info.mapping),
         dnie_pace_cipher_str(app->pace.info.cipher),
         dnie_pace_param_str(app->pace.info.param_id),
@@ -285,6 +291,15 @@ void dnie_scene_result_on_enter(void* context) {
             dnie_card_result_str(app->read_result),
             app->last_sw);
 
+    } else if(app->used_bac && app->bac_result != DnieBacOk) {
+        furi_string_printf(
+            text,
+            "\e#Error en BAC\n%s\nSW %04X\n",
+            dnie_bac_result_str(app->bac_result),
+            app->last_sw);
+        furi_string_cat_str(text, "Revisa el numero de\npasaporte y las fechas\n");
+        cat_technical(app, text);
+
     } else if(app->pace_result != DniePaceOk) {
         furi_string_printf(
             text,
@@ -293,7 +308,10 @@ void dnie_scene_result_on_enter(void* context) {
             app->pace.step,
             app->pace.sw);
         if(app->pace_result == DniePaceErrorWrongCan) {
-            furi_string_cat_str(text, "Revisa los 6 digitos\ndel anverso\n");
+            furi_string_cat_str(
+                text,
+                app->passport ? "Revisa el numero de\npasaporte y las fechas\n" :
+                                "Revisa los 6 digitos\ndel anverso\n");
         }
         cat_technical(app, text);
 
@@ -307,7 +325,7 @@ void dnie_scene_result_on_enter(void* context) {
         if(app->lds.result == DnieLdsErrorSm) {
             furi_string_cat_printf(text, "SM: %s\n", dnie_sm_result_str(app->lds.sm_result));
         }
-        furi_string_cat_str(text, "(PACE OK: el CAN\nes correcto)\n");
+        furi_string_cat_str(text, app->passport ? "(acceso OK: los datos\nson correctos)\n" : "(PACE OK: el CAN\nes correcto)\n");
         cat_technical(app, text);
 
     } else if(!app->mrz_ok) {

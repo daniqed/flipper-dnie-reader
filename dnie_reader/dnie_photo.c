@@ -28,7 +28,7 @@ static void file_progress(size_t done, size_t total, void* context) {
 }
 
 DnieLdsResult dnie_photo_read_dg2(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     DniePhoto* photo,
     DniePhotoProgress progress,

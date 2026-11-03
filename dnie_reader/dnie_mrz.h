@@ -12,6 +12,7 @@
 #include <stdbool.h>
 
 #define DNIE_MRZ_LEN 90
+#define DNIE_MRZ_TD3_LEN 88 // pasaporte: 2 lineas x 44
 
 typedef struct {
     char mrz[DNIE_MRZ_LEN + 1]; // MRZ en bruto
@@ -37,7 +38,7 @@ typedef struct {
 // Digito de control ICAO: pesos 7,3,1; 0-9 = valor, A-Z = 10..35, '<' = 0
 int dnie_mrz_check_digit(const char* s, size_t len);
 
-// Parsea DG1 completo (con su TLV). false si no es una MRZ TD1 valida.
+// Parsea DG1 completo (con su TLV): TD1 (DNIe) o TD3 (pasaporte).
 bool dnie_mrz_parse_dg1(const uint8_t* dg1, size_t len, DnieMrz* out);
 
 bool dnie_mrz_all_checks_ok(const DnieMrz* mrz);

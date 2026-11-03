@@ -67,8 +67,7 @@ Consulta `tests/README.md`.
 
 ## Pendiente
 
-- Pantalla de aviso a pantalla completa si el documento no es auténtico.
-- Pasaporte español (clave a partir de la MRZ).
+- Carnet de conducir (investigar: probablemente sin chip).
 
 ## Licencia
 

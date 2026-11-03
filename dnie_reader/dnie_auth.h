@@ -60,7 +60,7 @@ void dnie_auth_reset(DnieAuth* a); // libera y deja todo en "no comprobado"
 
 // Lee SOD y DG14 y comprueba DG1 y DG14. Dentro del callback del poller, app eMRTD seleccionada.
 void dnie_auth_read(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     const uint8_t* dg1,
     size_t dg1_len,

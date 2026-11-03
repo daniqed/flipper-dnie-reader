@@ -19,6 +19,7 @@ typedef enum {
     DniePaceErrorFormat, // respuesta con estructura inesperada
     DniePaceErrorBadPoint, // el chip mando un punto invalido o repetido
     DniePaceErrorCrypto,
+    DniePaceErrorNoMemory, // no hay RAM para la cuenta de curva eliptica
 } DniePaceResult;
 
 typedef struct {
@@ -37,10 +38,19 @@ typedef void (*DniePaceProgressCallback)(uint8_t step, void* context);
 // Elige la variante que implementamos: ECDH-GM + AES-128 + brainpoolP256r1
 bool dnie_pace_choose(const DniePaceInfo* infos, size_t n, DniePaceInfo* chosen);
 
-// PACE completo con el CAN. Al terminar OK, state->ks_enc / ks_mac abren el canal seguro.
+// Contrasena de PACE: el CAN (DNIe) o SHA-1 de la MRZ (pasaporte)
+#define DNIE_PACE_PW_MRZ 0x01
+#define DNIE_PACE_PW_CAN 0x02
+typedef struct {
+    uint8_t ref; // DNIE_PACE_PW_*
+    uint8_t secret[20];
+    size_t len;
+} DniePacePassword;
+
+// PACE completo. Al terminar OK, state->ks_enc / ks_mac abren el canal seguro.
 DniePaceResult dnie_pace_establish(
-    Iso14443_4bPoller* poller,
-    const char* can,
+    DnieTransport* poller,
+    const DniePacePassword* pw,
     DniePaceState* state,
     DniePaceProgressCallback progress,
     void* progress_context);

@@ -33,7 +33,7 @@ typedef struct {
 // Lee DG2 y lo vuelca a DNIE_DG2_PATH. Dentro del callback del poller, con la app eMRTD
 // ya seleccionada.
 DnieLdsResult dnie_photo_read_dg2(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     DniePhoto* photo,
     DniePhotoProgress progress,

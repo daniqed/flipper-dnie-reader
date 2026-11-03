@@ -35,11 +35,11 @@ typedef bool (*DnieLdsSink)(const uint8_t* data, size_t len, void* context);
 typedef void (*DnieLdsProgress)(size_t done, size_t total, void* context);
 
 // SELECT de la aplicacion eMRTD (una vez por sesion)
-DnieLdsResult dnie_lds_select_app(Iso14443_4bPoller* poller, DnieSm* sm, DnieLdsStatus* status);
+DnieLdsResult dnie_lds_select_app(DnieTransport* poller, DnieSm* sm, DnieLdsStatus* status);
 
 // Selecciona y lee un fichero TLV completo. Solo dentro del callback del poller.
 DnieLdsResult dnie_lds_read_file(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     uint16_t fid,
     DnieLdsSink sink,
@@ -50,7 +50,7 @@ DnieLdsResult dnie_lds_read_file(
 
 // Atajo: lee DG1 en memoria (requiere dnie_lds_select_app antes)
 DnieLdsResult dnie_lds_read_dg1(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     uint8_t* out,
     size_t out_max,
@@ -59,7 +59,7 @@ DnieLdsResult dnie_lds_read_dg1(
 
 // Un comando cualquiera por el canal seguro (lo usa Chip Authentication). false = abortar.
 bool dnie_lds_sm_command(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     const uint8_t hdr[4],
     const uint8_t* data,

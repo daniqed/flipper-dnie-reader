@@ -35,7 +35,7 @@ typedef struct {
 // Ejecuta CA. Si va bien, *sm queda con las claves nuevas. dg1_head = primeros 4 bytes de DG1
 // (los volvemos a leer por el canal nuevo para comprobarlo). Dentro del callback del poller.
 DnieCaResult dnie_ca_run(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     const DnieDg14* dg14,
     const uint8_t dg1_head[4],

@@ -6,7 +6,7 @@
 
 // Envia una APDU y devuelve el status word (SW1SW2). Los datos quedan en rx (sin el SW).
 bool dnie_card_apdu(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     const uint8_t* apdu,
     size_t apdu_len,
     BitBuffer* tx,
@@ -16,10 +16,19 @@ bool dnie_card_apdu(
     bit_buffer_reset(rx);
     bit_buffer_append_bytes(tx, apdu, apdu_len);
 
-    Iso14443_4bError err = iso14443_4b_poller_send_block(poller, tx, rx);
-    if(err != Iso14443_4bErrorNone) {
-        FURI_LOG_E(TAG, "send_block error %d", err);
-        return false;
+    int err;
+    if(poller->protocol == NfcProtocolIso14443_4a) {
+        err = iso14443_4a_poller_send_block(poller->poller, tx, rx);
+        if(err != Iso14443_4aErrorNone) {
+            FURI_LOG_E(TAG, "send_block 4A error %d", err);
+            return false;
+        }
+    } else {
+        err = iso14443_4b_poller_send_block(poller->poller, tx, rx);
+        if(err != Iso14443_4bErrorNone) {
+            FURI_LOG_E(TAG, "send_block 4B error %d", err);
+            return false;
+        }
     }
 
     size_t n = bit_buffer_get_size_bytes(rx);
@@ -31,7 +40,7 @@ bool dnie_card_apdu(
 
 // READ BINARY de 'le' bytes. p1p2 = offset (o SFI si p1 lleva el bit 0x80)
 static bool dnie_read_binary(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     uint8_t p1,
     uint8_t p2,
     uint8_t le,
@@ -51,7 +60,7 @@ static size_t dnie_append_data(BitBuffer* rx, uint8_t* out, size_t pos, size_t o
 }
 
 DnieCardResult dnie_card_read_card_access(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     uint8_t* out,
     size_t out_max,
     size_t* out_len,

@@ -69,6 +69,53 @@ static size_t read_tl(const uint8_t* p, size_t avail, uint16_t* tag, size_t* len
     return i;
 }
 
+// Nombre: APELLIDO1<APELLIDO2<<NOMBRE<NOMBRE2
+static void parse_name(const char* f, size_t n, DnieMrz* out) {
+    const char* sep = NULL;
+    for(size_t i = 0; i + 1 < n; i++) {
+        if(f[i] == '<' && f[i + 1] == '<') {
+            sep = f + i;
+            break;
+        }
+    }
+    if(sep) {
+        copy_trim(out->surnames, sizeof(out->surnames), f, (size_t)(sep - f));
+        copy_trim(out->given_names, sizeof(out->given_names), sep + 2, (size_t)(f + n - (sep + 2)));
+    } else {
+        copy_trim(out->surnames, sizeof(out->surnames), f, n);
+    }
+    filler_to_spaces(out->surnames);
+    filler_to_spaces(out->given_names);
+}
+
+// TD3 (pasaporte):
+//  Linea 1: tipo(2) emisor(3) APELLIDOS<<NOMBRE (39)
+//  Linea 2: n_doc(9) cd nacionalidad(3) nacimiento(6) cd sexo caducidad(6) cd
+//           n_personal(14) cd compuesto   <- el pasaporte espanol pone aqui el DNI
+static bool parse_td3(const char* m, DnieMrz* out) {
+    const char* l1 = m;
+    const char* l2 = m + 44;
+    copy_trim(out->doc_type, sizeof(out->doc_type), l1, 2);
+    copy_trim(out->issuer, sizeof(out->issuer), l1 + 2, 3);
+    parse_name(l1 + 5, 39, out);
+    copy_trim(out->doc_number, sizeof(out->doc_number), l2, 9);
+    copy_trim(out->nationality, sizeof(out->nationality), l2 + 10, 3);
+    memcpy(out->birth, l2 + 13, 6);
+    out->sex = l2[20];
+    memcpy(out->expiry, l2 + 21, 6);
+    copy_trim(out->personal_number, sizeof(out->personal_number), l2 + 28, 14);
+
+    out->check_doc_number = check_field(l2, 9, l2[9]);
+    out->check_birth = check_field(l2 + 13, 6, l2[19]);
+    out->check_expiry = check_field(l2 + 21, 6, l2[27]);
+    char comp[10 + 7 + 22];
+    memcpy(comp, l2, 10);
+    memcpy(comp + 10, l2 + 13, 7);
+    memcpy(comp + 17, l2 + 21, 22);
+    out->check_composite = check_field(comp, sizeof(comp), l2[43]);
+    return true;
+}
+
 bool dnie_mrz_parse_dg1(const uint8_t* dg1, size_t len, DnieMrz* out) {
     memset(out, 0, sizeof(*out));
     uint16_t tag;
@@ -80,15 +127,17 @@ bool dnie_mrz_parse_dg1(const uint8_t* dg1, size_t len, DnieMrz* out) {
     size_t inner_len = l;
 
     h = read_tl(inner, inner_len, &tag, &l);
-    if(h == 0 || tag != 0x5F1F || l != DNIE_MRZ_LEN) return false; // solo TD1 (tarjeta)
+    // TD1 (tarjeta, 3x30) o TD3 (pasaporte, 2x44)
+    if(h == 0 || tag != 0x5F1F || (l != DNIE_MRZ_LEN && l != DNIE_MRZ_TD3_LEN)) return false;
     const char* m = (const char*)(inner + h);
 
-    for(size_t i = 0; i < DNIE_MRZ_LEN; i++) {
+    for(size_t i = 0; i < l; i++) {
         char c = m[i];
         if(!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || c == '<')) return false;
     }
-    memcpy(out->mrz, m, DNIE_MRZ_LEN);
-    out->mrz[DNIE_MRZ_LEN] = '\0';
+    memcpy(out->mrz, m, l);
+    out->mrz[l] = '\0';
+    if(l == DNIE_MRZ_TD3_LEN) return parse_td3(m, out);
 
     const char* l1 = m;
     const char* l2 = m + 30;
@@ -103,23 +152,7 @@ bool dnie_mrz_parse_dg1(const uint8_t* dg1, size_t len, DnieMrz* out) {
     out->sex = l2[7];
     memcpy(out->expiry, l2 + 8, 6);
     copy_trim(out->nationality, sizeof(out->nationality), l2 + 15, 3);
-
-    // Nombre: APELLIDO1<APELLIDO2<<NOMBRE<NOMBRE2
-    const char* sep = NULL;
-    for(int i = 0; i + 1 < 30; i++) {
-        if(l3[i] == '<' && l3[i + 1] == '<') {
-            sep = l3 + i;
-            break;
-        }
-    }
-    if(sep) {
-        copy_trim(out->surnames, sizeof(out->surnames), l3, (size_t)(sep - l3));
-        copy_trim(out->given_names, sizeof(out->given_names), sep + 2, (size_t)(l3 + 30 - (sep + 2)));
-    } else {
-        copy_trim(out->surnames, sizeof(out->surnames), l3, 30);
-    }
-    filler_to_spaces(out->surnames);
-    filler_to_spaces(out->given_names);
+    parse_name(l3, 30, out);
 
     out->check_doc_number = check_field(l1 + 5, 9, l1[14]);
     out->check_birth = check_field(l2, 6, l2[6]);

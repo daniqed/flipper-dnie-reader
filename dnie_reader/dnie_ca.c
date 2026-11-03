@@ -57,7 +57,7 @@ static int32_t ca_thread(void* context) {
 }
 
 DnieCaResult dnie_ca_run(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     const DnieDg14* dg14,
     const uint8_t dg1_head[4],

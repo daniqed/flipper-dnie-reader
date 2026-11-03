@@ -3,6 +3,7 @@
 
 typedef enum {
     SubmenuIndexRead,
+    SubmenuIndexPassport,
     SubmenuIndexSaved,
     SubmenuIndexDelete,
     SubmenuIndexAbout,
@@ -22,6 +23,8 @@ void dnie_scene_start_on_enter(void* context) {
     submenu_add_item(
         submenu, "Leer DNIe", SubmenuIndexRead, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
+        submenu, "Leer pasaporte", SubmenuIndexPassport, dnie_scene_start_submenu_callback, app);
+    submenu_add_item(
         submenu, "Lecturas guardadas", SubmenuIndexSaved, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
         submenu, "Borrar foto (jp2) SD", SubmenuIndexDelete, dnie_scene_start_submenu_callback, app);
@@ -36,7 +39,8 @@ bool dnie_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexRead) {
+        if(event.event == SubmenuIndexRead || event.event == SubmenuIndexPassport) {
+            app->passport = event.event == SubmenuIndexPassport;
             scene_manager_next_scene(app->scene_manager, DnieSceneCanInput);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {

@@ -8,6 +8,7 @@
 #include <gui/modules/widget.h>
 #include <nfc/nfc.h>
 #include <nfc/nfc_poller.h>
+#include <nfc/nfc_scanner.h>
 #include <notification/notification_messages.h>
 
 #include "dnie_card.h"
@@ -21,6 +22,7 @@
 #include "dnie_pixelart.h"
 #include "dnie_store.h"
 #include "dnie_auth.h"
+#include "dnie_bac.h"
 
 #define DNIE_CAN_LENGTH 6 // El CAN del DNIe son 6 digitos impresos en el anverso
 #define DNIE_CAN_BUFFER_SIZE (DNIE_CAN_LENGTH + 1)
@@ -42,7 +44,17 @@ typedef enum {
     DnieCustomEventCardDetails, // OK en el carnet -> detalles
     DnieCustomEventCardDeleted, // lectura guardada borrada desde el carnet
     DnieCustomEventCardSave, // arriba en el carnet -> menu de guardar
+    DnieCustomEventWarningShow, // aviso de no autentico -> ver carnet
+    DnieCustomEventWarningExit,
+    DnieCustomEventDetected, // el escaner encontro un chip 4A/4B
 } DnieCustomEvent;
+
+typedef enum {
+    DnieInputCan,
+    DnieInputPassNumber,
+    DnieInputPassBirth,
+    DnieInputPassExpiry,
+} DnieInputField;
 
 // Contexto global de la app: lo comparten todas las escenas
 typedef struct {
@@ -55,6 +67,17 @@ typedef struct {
     NotificationApp* notifications; // LED, vibracion y sonido
 
     char can[DNIE_CAN_BUFFER_SIZE]; // CAN introducido por el usuario
+
+    // Pasaporte: la clave sale de la MRZ (n de pasaporte + nacimiento + caducidad)
+    bool passport;
+    char pass_number[10]; // A-Z/0-9
+    char pass_birth[7]; // AAMMDD
+    char pass_expiry[7]; // AAMMDD
+    uint8_t input_field; // DnieInputField que se esta editando
+    bool used_bac; // el pasaporte no tenia PACE: se uso BAC
+    DnieBacResult bac_result;
+    NfcScanner* scanner; // detecta si el chip es ISO14443-4A o 4B
+    NfcProtocol protocol;
 
     // NFC
     Nfc* nfc;

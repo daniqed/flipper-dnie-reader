@@ -4,6 +4,8 @@
 
 #include <string.h>
 #include <furi_hal_random.h>
+#include <mbedtls/ecp.h>
+#include <mbedtls/bignum.h>
 
 #define TAG "DniePace"
 #define SW_OK 0x9000
@@ -101,6 +103,13 @@ static int32_t dnie_ecc_thread(void* context) {
 }
 
 // Ejecuta la operacion en un hilo aparte y espera. Devuelve el ret de mbedtls.
+// -2: sin hueco para el hilo. Los ALLOC_FAILED de mbedtls tambien son falta de memoria.
+static DniePaceResult ecc_error(int ret, DniePaceResult otherwise) {
+    if(ret == -2 || ret == MBEDTLS_ERR_ECP_ALLOC_FAILED || ret == MBEDTLS_ERR_MPI_ALLOC_FAILED)
+        return DniePaceErrorNoMemory;
+    return otherwise;
+}
+
 static int dnie_ecc_run(DnieEccCtx* c, DnieEccOp op, uint32_t* elapsed_ms) {
     c->op = op;
     c->ret = -1;
@@ -147,7 +156,7 @@ static void dnie_pace_oid(const DniePaceInfo* info, uint8_t oid[DNIE_PACE_OID_LE
 // Extrae de la respuesta el objeto resp_tag, que debe medir exactamente out_len.
 // Devuelve false si hubo error de transporte; si no, mira *sw y *found.
 static bool dnie_pace_ga(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     BitBuffer* tx,
     BitBuffer* rx,
     bool chained, // true = quedan mas GA despues (CLA 0x10)
@@ -206,8 +215,8 @@ static bool dnie_pace_ga(
 
 // Paso 1: MSE:Set AT + nonce cifrado + descifrado con K_pi = KDF(CAN, 3)
 static DniePaceResult dnie_pace_step_nonce(
-    Iso14443_4bPoller* poller,
-    const char* can,
+    DnieTransport* poller,
+    const DniePacePassword* pw,
     DniePaceState* state,
     BitBuffer* tx,
     BitBuffer* rx) {
@@ -217,7 +226,7 @@ static DniePaceResult dnie_pace_step_nonce(
     // 80: OID   83: tipo de contrasena (02 = CAN)   84: parameterId
     uint8_t mse[5 + 2 + DNIE_PACE_OID_LEN + 3 + 3] = {0x00, 0x22, 0xC1, 0xA4, 0x12, 0x80, 0x0A};
     memcpy(&mse[7], oid, DNIE_PACE_OID_LEN);
-    const uint8_t tail[] = {0x83, 0x01, PACE_PASSWORD_CAN, 0x84, 0x01, (uint8_t)state->info.param_id};
+    const uint8_t tail[] = {0x83, 0x01, pw->ref, 0x84, 0x01, (uint8_t)state->info.param_id};
     memcpy(&mse[7 + DNIE_PACE_OID_LEN], tail, sizeof(tail));
 
     if(!dnie_card_apdu(poller, mse, sizeof(mse), tx, rx, &state->sw))
@@ -232,15 +241,15 @@ static DniePaceResult dnie_pace_step_nonce(
     if(!found) return DniePaceErrorFormat;
 
     uint8_t k_pi[16];
-    bool ok = dnie_kdf_aes128((const uint8_t*)can, strlen(can), DNIE_KDF_PI, k_pi) &&
+    bool ok = dnie_kdf_aes128(pw->secret, pw->len, DNIE_KDF_PI, k_pi) &&
               dnie_aes128_cbc_decrypt_iv0(k_pi, z, DNIE_NONCE_LEN, state->nonce);
     memset(k_pi, 0, sizeof(k_pi));
     return ok ? DniePaceOk : DniePaceErrorCrypto;
 }
 
 DniePaceResult dnie_pace_establish(
-    Iso14443_4bPoller* poller,
-    const char* can,
+    DnieTransport* poller,
+    const DniePacePassword* pw,
     DniePaceState* state,
     DniePaceProgressCallback progress,
     void* progress_context) {
@@ -260,16 +269,17 @@ DniePaceResult dnie_pace_establish(
 
     do {
         // ---- Paso 1: nonce ----
+        int ecc_ret;
         state->step = 1;
         if(progress) progress(1, progress_context);
-        result = dnie_pace_step_nonce(poller, can, state, tx, rx);
+        result = dnie_pace_step_nonce(poller, pw, state, tx, rx);
         if(result != DniePaceOk) break;
 
         // ---- Paso 2: mapeo del generador ----
         state->step = 2;
         if(progress) progress(2, progress_context);
-        if(dnie_ecc_run(c, DnieEccOpMapKeypair, &state->ecc_ms) != 0) {
-            result = DniePaceErrorCrypto;
+        if((ecc_ret = dnie_ecc_run(c, DnieEccOpMapKeypair, &state->ecc_ms)) != 0) {
+            result = ecc_error(ecc_ret, DniePaceErrorCrypto);
             break;
         }
         if(!dnie_pace_ga(
@@ -291,8 +301,8 @@ DniePaceResult dnie_pace_establish(
         state->step = 3;
         if(progress) progress(3, progress_context);
         c->s = state->nonce;
-        if(dnie_ecc_run(c, DnieEccOpMapAndEphemeral, &state->ecc_ms) != 0) {
-            result = DniePaceErrorBadPoint;
+        if((ecc_ret = dnie_ecc_run(c, DnieEccOpMapAndEphemeral, &state->ecc_ms)) != 0) {
+            result = ecc_error(ecc_ret, DniePaceErrorBadPoint);
             break;
         }
         if(!dnie_pace_ga(
@@ -309,8 +319,8 @@ DniePaceResult dnie_pace_establish(
             result = DniePaceErrorFormat;
             break;
         }
-        if(dnie_ecc_run(c, DnieEccOpSharedSecret, &state->ecc_ms) != 0) {
-            result = DniePaceErrorBadPoint;
+        if((ecc_ret = dnie_ecc_run(c, DnieEccOpSharedSecret, &state->ecc_ms)) != 0) {
+            result = ecc_error(ecc_ret, DniePaceErrorBadPoint);
             break;
         }
 
@@ -382,7 +392,7 @@ const char* dnie_pace_result_str(DniePaceResult result) {
     case DniePaceErrorKeyAgreement:
         return "El chip rechazo\nel paso 3 (ECDH)";
     case DniePaceErrorWrongCan:
-        return "CAN incorrecto";
+        return "CAN o datos de la\nMRZ incorrectos";
     case DniePaceErrorChipToken:
         return "El token del chip\nno cuadra";
     case DniePaceErrorFormat:
@@ -390,7 +400,9 @@ const char* dnie_pace_result_str(DniePaceResult result) {
     case DniePaceErrorBadPoint:
         return "Punto de curva\ninvalido";
     case DniePaceErrorCrypto:
-        return "Error de cripto o\nsin memoria";
+        return "Error de cripto";
+    case DniePaceErrorNoMemory:
+        return "Sin memoria para\nla curva eliptica";
     }
     return "Error desconocido";
 }

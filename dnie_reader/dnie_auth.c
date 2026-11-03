@@ -35,7 +35,7 @@ static DnieCheck check_hash(const DnieSod* sod, uint8_t dg, const uint8_t* data,
 }
 
 void dnie_auth_read(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     const uint8_t* dg1,
     size_t dg1_len,

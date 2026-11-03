@@ -65,3 +65,7 @@ con ChipAuthenticationInfo/PublicKeyInfo. Necesita `pip install asn1crypto crypt
 - `test_csca.c`: cadena CSCA SPAIN con certificados reales y publicos (Master List del BSI):
   el certificado enlace de la CSCA 4 firmado por la CSCA 3 (RSA-4096 + SHA-256), los
   autofirmados, uno manipulado y uno con emisor desconocido.
+
+- `test_bac.c`: BAC con el ejemplo resuelto de ICAO 9303-11 apendice D.3 (chip simulado con
+  los stubs de `stub/`): E_IFD, M_IFD, KSenc, KSmac y SSC byte a byte.
+- `test_td3.c`: MRZ de pasaporte (TD3) con el especimen de ICAO y deteccion de manipulacion.

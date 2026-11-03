@@ -8,14 +8,14 @@
 #define LDS_BUF 300
 
 typedef struct {
-    Iso14443_4bPoller* poller;
+    DnieTransport* poller;
     DnieSm* sm;
     BitBuffer* tx;
     BitBuffer* rx;
     DnieLdsStatus* status;
 } LdsCtx;
 
-static void lds_ctx_init(LdsCtx* c, Iso14443_4bPoller* poller, DnieSm* sm, DnieLdsStatus* status) {
+static void lds_ctx_init(LdsCtx* c, DnieTransport* poller, DnieSm* sm, DnieLdsStatus* status) {
     c->poller = poller;
     c->sm = sm;
     c->tx = bit_buffer_alloc(LDS_BUF);
@@ -66,7 +66,7 @@ static bool lds_transceive(
 }
 
 bool dnie_lds_sm_command(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     const uint8_t hdr[4],
     const uint8_t* data,
@@ -84,7 +84,7 @@ bool dnie_lds_sm_command(
     return ok;
 }
 
-DnieLdsResult dnie_lds_select_app(Iso14443_4bPoller* poller, DnieSm* sm, DnieLdsStatus* status) {
+DnieLdsResult dnie_lds_select_app(DnieTransport* poller, DnieSm* sm, DnieLdsStatus* status) {
     memset(status, 0, sizeof(*status));
     LdsCtx c;
     lds_ctx_init(&c, poller, sm, status);
@@ -105,7 +105,7 @@ DnieLdsResult dnie_lds_select_app(Iso14443_4bPoller* poller, DnieSm* sm, DnieLds
 }
 
 DnieLdsResult dnie_lds_read_file(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     uint16_t fid,
     DnieLdsSink sink,
@@ -206,7 +206,7 @@ static bool mem_sink(const uint8_t* data, size_t len, void* context) {
 }
 
 DnieLdsResult dnie_lds_read_dg1(
-    Iso14443_4bPoller* poller,
+    DnieTransport* poller,
     DnieSm* sm,
     uint8_t* out,
     size_t out_max,

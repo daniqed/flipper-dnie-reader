@@ -7,7 +7,7 @@ void dnie_scene_about_on_enter(void* context) {
 
     widget_reset(widget);
     widget_add_string_element(
-        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "DNIe Reader v0.13");
+        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "DNIe Reader v0.15");
     widget_add_string_multiline_element(
         widget,
         64,
@@ -15,7 +15,7 @@ void dnie_scene_about_on_enter(void* context) {
         AlignCenter,
         AlignTop,
         FontSecondary,
-        "Lector del DNIe (PACE+CAN)\nPACE+SM, DG1, foto\nSolo tu propio DNI");
+        "DNIe y pasaporte\nPACE, BAC, foto, firma\nSolo tus documentos");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DnieViewWidget);
 }
