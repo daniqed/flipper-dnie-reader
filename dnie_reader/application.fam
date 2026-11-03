@@ -1,0 +1,25 @@
+App(
+    appid="dnie_reader",
+    name="DNIe Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="dnie_reader_app",
+    stack_size=6 * 1024,  # el decodificador JPEG2000 corre en este hilo
+    fap_category="NFC",
+    fap_author="Dani",
+    fap_version="0.12",
+    fap_icon="dnie_10px.png",
+    fap_description="Lector del DNIe espanol (PACE con CAN). PACE + Secure Messaging: pixel art, album, lecturas cifradas y deteccion de clones.",
+    fap_libs=["mbedtls"],  # SHA-1, AES y ECP del SDK
+    # La libmbedtls.a del SDK no trae constant_time.o: lo compilamos nosotros (misma version 3.6.2)
+    fap_private_libs=[
+        Lib(
+            name="mbedtls_ct",
+            sources=["constant_time.c"],
+            fap_include_paths=[".", "include"],
+            cflags=["-Wno-unused-parameter"],
+        ),
+    ],
+    requires=[
+        "gui",
+    ],
+)
