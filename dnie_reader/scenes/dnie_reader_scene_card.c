@@ -233,26 +233,11 @@ static void draw_names(Canvas* canvas, int x, int w, const char* given, const ch
     }
 }
 
-// Lectura renombrada: el alias en grande y debajo el nombre del documento
-static void draw_alias(
-    Canvas* canvas,
-    int x,
-    int w,
-    const char* alias,
-    const char* given,
-    const char* surnames) {
-    char line[32];
-    canvas_set_font(canvas, FontPrimary);
-    draw_fit(canvas, x, 9, alias, w);
-    canvas_set_font(canvas, FontSecondary);
-    strlcpy(line, given, sizeof(line));
-    char* sp = strchr(line, ' ');
-    if(sp) *sp = '\0';
-    draw_fit(canvas, x, 19, line, w);
-    strlcpy(line, surnames, sizeof(line));
-    sp = strchr(line, ' ');
-    if(sp) *sp = '\0';
-    draw_fit(canvas, x, 28, line, w);
+// Lectura renombrada: el nombre puesto sustituye a nombre y apellidos.
+// Primera palabra en grande, el resto debajo (como los apellidos).
+static void draw_alias(Canvas* canvas, int x, int w, const char* alias) {
+    const char* sp = strchr(alias, ' ');
+    draw_names(canvas, x, w, alias, sp ? sp + 1 : "");
 }
 
 static void card_draw(Canvas* canvas, void* model) {
@@ -282,7 +267,7 @@ static void card_draw(Canvas* canvas, void* model) {
     if(app->viewing_album) {
         // Album: nombre, cumpleanos y cuenta atras
         if(app->viewing_saved && app->saved_alias[0]) {
-            draw_alias(canvas, x, w, app->saved_alias, app->album_given, app->album_surnames);
+            draw_alias(canvas, x, w, app->saved_alias);
         } else {
             draw_names(canvas, x, w, app->album_given, app->album_surnames);
         }
@@ -306,7 +291,7 @@ static void card_draw(Canvas* canvas, void* model) {
     } else {
         const DnieMrz* m = &app->mrz;
         if(app->viewing_saved && app->saved_alias[0]) {
-            draw_alias(canvas, x, w, app->saved_alias, m->given_names, m->surnames);
+            draw_alias(canvas, x, w, app->saved_alias);
         } else {
             draw_names(canvas, x, w, m->given_names, m->surnames);
         }

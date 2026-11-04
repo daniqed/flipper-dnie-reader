@@ -261,8 +261,8 @@ void dnie_scene_result_on_enter(void* context) {
         furi_string_printf(
             text,
             "\e#%s\n%s\n%s\nBirthday: %c%c/%c%c/%.4s\n\n\e#Album\nOnly the name,\nphoto and birthday\nwere saved.\nNo document\nnumbers.\n\nSaved %02u/%02u/%u\nEncrypted with this\nFlipper's unique key\n\n\e#Card controls\n<- -> photo style\nHold OK: rename\nHold down:\ndelete\n",
-            app->album_given,
-            app->album_surnames,
+            app->saved_alias[0] ? app->saved_alias : app->album_given,
+            app->saved_alias[0] ? "" : app->album_surnames,
             dnie_country_name(app->album_issuer),
             app->album_birth[6],
             app->album_birth[7],
@@ -276,7 +276,11 @@ void dnie_scene_result_on_enter(void* context) {
         const DnieMrz* m = &app->mrz;
         DateTime saved;
         datetime_timestamp_to_datetime(app->saved_at, &saved);
-        furi_string_printf(text, "\e#%s\n%s\n", m->given_names, m->surnames);
+        furi_string_printf(
+            text,
+            "\e#%s\n%s\n",
+            app->saved_alias[0] ? app->saved_alias : m->given_names,
+            app->saved_alias[0] ? "" : m->surnames);
         furi_string_cat_printf(
             text, "ID: %s\nSupport: %s\nBorn: ", m->personal_number, m->doc_number);
         cat_date(text, m->birth, true, now.year);

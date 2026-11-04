@@ -6,7 +6,7 @@ App(
     stack_size=6 * 1024,  # el decodificador JPEG2000 corre en este hilo
     fap_category="NFC",
     fap_author="Dani",
-    fap_weburl="https://github.com/daniqed/flipper-dnie-reader",
+    fap_weburl="https://github.com/daniqed/flipper-identity",
     fap_version="0.21",
     fap_icon="dnie_10px.png",
     fap_file_assets="assets", # csca.bin: claves CSCA de otros paises (se copia a la SD)
