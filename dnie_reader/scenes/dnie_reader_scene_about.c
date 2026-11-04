@@ -6,8 +6,7 @@ void dnie_scene_about_on_enter(void* context) {
     Widget* widget = app->widget;
 
     widget_reset(widget);
-    widget_add_string_element(
-        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "IDentity v0.21");
+    widget_add_string_element(widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "IDentity v0.21");
     widget_add_string_multiline_element(
         widget,
         64,

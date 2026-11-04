@@ -7,6 +7,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/text_input.h>
 #include <nfc/nfc.h>
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>
@@ -26,7 +27,7 @@
 #include "dnie_bac.h"
 #include "dnie_country.h"
 
-#define DNIE_CAN_LENGTH 6 // El CAN del DNIe son 6 digitos impresos en el anverso
+#define DNIE_CAN_LENGTH      6 // El CAN del DNIe son 6 digitos impresos en el anverso
 #define DNIE_CAN_BUFFER_SIZE (DNIE_CAN_LENGTH + 1)
 
 // Identificadores de cada View registrada en el ViewDispatcher
@@ -36,6 +37,7 @@ typedef enum {
     DnieViewCard, // carnet con la foto en pixel art
     DnieViewCan, // CAN: 6 casillas numericas
     DnieViewSettings, // volumen del himno
+    DnieViewTextInput, // renombrar una lectura guardada
 } DnieView;
 
 // Eventos personalizados que las escenas se mandan entre si
@@ -50,6 +52,8 @@ typedef enum {
     DnieCustomEventWarningShow, // aviso de no autentico -> ver carnet
     DnieCustomEventWarningExit,
     DnieCustomEventDetected, // el escaner encontro un chip 4A/4B
+    DnieCustomEventCardRename, // mantener OK en una lectura guardada
+    DnieCustomEventRenameDone,
 } DnieCustomEvent;
 
 typedef enum {
@@ -66,6 +70,8 @@ typedef struct {
 
     Submenu* submenu;
     VariableItemList* settings;
+    TextInput* text_input; // solo existe mientras se renombra
+    char text_buf[DNIE_RECORD_ALIAS_MAX];
     View* can_view;
     Widget* widget;
     NotificationApp* notifications; // LED, vibracion y sonido
@@ -75,6 +81,7 @@ typedef struct {
     // Pasaporte: la clave sale de la MRZ (n de pasaporte + nacimiento + caducidad)
     bool passport; // la clave sale de la MRZ (pasaporte o DNI extranjero con MRZ)
     bool foreign_id; // DNI de otro pais (textos genericos)
+    bool demo; // datos ficticios del modo demo (no se pueden guardar)
     char pass_number[10]; // A-Z/0-9
     char pass_birth[7]; // AAMMDD
     char pass_expiry[7]; // AAMMDD
@@ -139,6 +146,7 @@ typedef struct {
     char album_surnames[DNIE_RECORD_NAME_MAX];
     char album_birth[9]; // AAAAMMDD
     char album_issuer[4]; // pais emisor (vacio en albumes antiguos)
+    char saved_alias[DNIE_RECORD_ALIAS_MAX]; // nombre puesto por el usuario (o vacio)
 
     uint16_t last_sw;
     uint8_t card_access[DNIE_CARD_ACCESS_MAX];

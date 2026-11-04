@@ -173,7 +173,8 @@ static bool restart(Jpeg* j) {
     }
     j->marker_hit = false;
     if(b < 0xD0 || b > 0xD7) return false;
-    for(int i = 0; i < j->ncomp; i++) j->comp[i].pred = 0;
+    for(int i = 0; i < j->ncomp; i++)
+        j->comp[i].pred = 0;
     return true;
 }
 

@@ -98,7 +98,8 @@ void dnie_auth_read(
     a->sod_parsed = true;
     a->lds_hash = a->sod->lds_hash;
     a->dg_count = a->sod->dg_count;
-    for(uint8_t k = 0; k < a->dg_count; k++) a->dg_numbers[k] = a->sod->dgs[k].number;
+    for(uint8_t k = 0; k < a->dg_count; k++)
+        a->dg_numbers[k] = a->sod->dgs[k].number;
     strlcpy(a->sig_alg, a->sod->sig_alg, sizeof(a->sig_alg));
     a->has_cert = a->sod->has_cert;
     strlcpy(a->ds_subject_cn, a->sod->ds_subject_cn, sizeof(a->ds_subject_cn));
@@ -112,7 +113,12 @@ void dnie_auth_read(
     } else {
         a->pa.result = DniePaNoMemory;
     }
-    FURI_LOG_I(TAG, "Firma SOD: %d (%u bits) en %lu ms", a->pa.result, a->pa.key_bits, furi_get_tick() - t0);
+    FURI_LOG_I(
+        TAG,
+        "Firma SOD: %d (%u bits) en %lu ms",
+        a->pa.result,
+        a->pa.key_bits,
+        furi_get_tick() - t0);
 
     // Cadena: el certificado DS tiene que estar firmado por una CSCA SPAIN (RSA-4096)
     if(a->sod->has_cert) {
@@ -121,7 +127,8 @@ void dnie_auth_read(
             // CSCA de otros paises: fichero de assets en la SD
             Storage* storage = furi_record_open(RECORD_STORAGE);
             File* f = storage_file_alloc(storage);
-            bool open = storage_file_open(f, APP_ASSETS_PATH("csca.bin"), FSAM_READ, FSOM_OPEN_EXISTING);
+            bool open =
+                storage_file_open(f, APP_ASSETS_PATH("csca.bin"), FSAM_READ, FSOM_OPEN_EXISTING);
             dnie_csca_verify_cert(&a->sod->cert, open ? csca_file_read : NULL, f, &a->csca);
             if(open) storage_file_close(f);
             storage_file_free(f);
@@ -183,13 +190,13 @@ void dnie_auth_compact(DnieAuth* a) {
 }
 
 bool dnie_auth_all_ok(const DnieAuth* a) {
-    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk &&
-           a->csca.result == DnieCscaOk && a->ca.result == DnieCaOk;
+    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk && a->csca.result == DnieCscaOk &&
+           a->ca.result == DnieCaOk;
 }
 
 bool dnie_auth_data_ok(const DnieAuth* a) {
-    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk &&
-           a->csca.result == DnieCscaOk && a->ca.result != DnieCaFailed;
+    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk && a->csca.result == DnieCscaOk &&
+           a->ca.result != DnieCaFailed;
 }
 
 bool dnie_auth_integrity_failed(const DnieAuth* a) {

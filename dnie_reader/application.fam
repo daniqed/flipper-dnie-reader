@@ -6,10 +6,11 @@ App(
     stack_size=6 * 1024,  # el decodificador JPEG2000 corre en este hilo
     fap_category="NFC",
     fap_author="Dani",
+    fap_weburl="https://github.com/daniqed/flipper-dnie-reader",
     fap_version="0.21",
     fap_icon="dnie_10px.png",
     fap_file_assets="assets", # csca.bin: claves CSCA de otros paises (se copia a la SD)
-    fap_description="Lector del DNIe espanol (PACE con CAN). PACE + Secure Messaging: pixel art, album, lecturas cifradas y deteccion de clones.",
+    fap_description="Read eIDs and ePassports (PACE/BAC), show the photo as pixel art and verify authenticity: SOD hashes, signature, CSCA chain and Chip Authentication.",
     fap_libs=["mbedtls"],  # SHA-1, AES y ECP del SDK
     # La libmbedtls.a del SDK no trae constant_time.o: lo compilamos nosotros (misma version 3.6.2)
     fap_private_libs=[

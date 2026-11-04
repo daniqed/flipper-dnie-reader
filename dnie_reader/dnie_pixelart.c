@@ -46,7 +46,8 @@ bool dnie_pixelart_prepare(
     // 2. Contraste automatico: el 2 % mas oscuro -> negro, el 2 % mas claro -> blanco
     uint32_t hist[256] = {0};
     uint32_t total = tw * th;
-    for(uint32_t i = 0; i < total; i++) hist[out->gray[i]]++;
+    for(uint32_t i = 0; i < total; i++)
+        hist[out->gray[i]]++;
     uint32_t cut = total / 50, acc = 0;
     int lo = 0, hi = 255;
     for(int v = 0; v < 256; v++) {
@@ -86,16 +87,13 @@ typedef struct {
     uint8_t w;
 } Tap;
 
-static bool diffuse(
-    const DniePixelSource* src,
-    DniePixelArt* out,
-    const Tap* taps,
-    int ntaps,
-    int divisor) {
+static bool
+    diffuse(const DniePixelSource* src, DniePixelArt* out, const Tap* taps, int ntaps, int divisor) {
     uint32_t tw = src->width, th = src->height;
     int16_t* buf = malloc(sizeof(int16_t) * tw * th);
     if(!buf) return false;
-    for(uint32_t i = 0; i < tw * th; i++) buf[i] = src->gray[i];
+    for(uint32_t i = 0; i < tw * th; i++)
+        buf[i] = src->gray[i];
     for(uint32_t y = 0; y < th; y++) {
         for(uint32_t x = 0; x < tw; x++) {
             int old = buf[y * tw + x];

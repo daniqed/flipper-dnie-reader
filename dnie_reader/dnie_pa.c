@@ -8,12 +8,48 @@ static const uint8_t OID_RSA_ENCRYPTION[] = {0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D,
 static const uint8_t OID_RSA_PREFIX[] = {0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01};
 
 // DigestInfo DER (sin el hash) de cada algoritmo, con parametros NULL (forma habitual)
-static const uint8_t DI_SHA1[] = {0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E,
-                                  0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14};
-static const uint8_t DI_SHA224[] = {0x30, 0x2D, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01,
-                                    0x65, 0x03, 0x04, 0x02, 0x04, 0x05, 0x00, 0x04, 0x1C};
-static const uint8_t DI_SHA256[] = {0x30, 0x31, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01,
-                                    0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20};
+static const uint8_t DI_SHA1[] =
+    {0x30, 0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05, 0x00, 0x04, 0x14};
+static const uint8_t DI_SHA224[] = {
+    0x30,
+    0x2D,
+    0x30,
+    0x0D,
+    0x06,
+    0x09,
+    0x60,
+    0x86,
+    0x48,
+    0x01,
+    0x65,
+    0x03,
+    0x04,
+    0x02,
+    0x04,
+    0x05,
+    0x00,
+    0x04,
+    0x1C};
+static const uint8_t DI_SHA256[] = {
+    0x30,
+    0x31,
+    0x30,
+    0x0D,
+    0x06,
+    0x09,
+    0x60,
+    0x86,
+    0x48,
+    0x01,
+    0x65,
+    0x03,
+    0x04,
+    0x02,
+    0x01,
+    0x05,
+    0x00,
+    0x04,
+    0x20};
 
 static const uint8_t* digest_info(DnieHashAlg alg, size_t* len) {
     switch(alg) {
@@ -32,7 +68,8 @@ static const uint8_t* digest_info(DnieHashAlg alg, size_t* len) {
 }
 
 // Comprueba el DigestInfo de EM, aceptando tambien la variante sin NULL (30 xx 30 yy 06 OID 04 ..)
-static bool digest_info_matches(DnieHashAlg alg, const uint8_t* di, size_t len, const uint8_t* hash) {
+static bool
+    digest_info_matches(DnieHashAlg alg, const uint8_t* di, size_t len, const uint8_t* hash) {
     size_t ref_len;
     const uint8_t* ref = digest_info(alg, &ref_len);
     size_t hl = dnie_hash_len(alg);
@@ -91,7 +128,8 @@ DniePaResult dnie_pa_rsa_pkcs1_verify(
         // EM = 00 01 FF..FF 00 DigestInfo  (al menos 8 bytes FF)
         if(em[0] != 0x00 || em[1] != 0x01) break;
         size_t i = 2;
-        while(i < n_len && em[i] == 0xFF) i++;
+        while(i < n_len && em[i] == 0xFF)
+            i++;
         if(i - 2 < 8 || i >= n_len || em[i] != 0x00) break;
         i++;
         if(digest_info_matches(alg, em + i, n_len - i, hash)) r = DniePaOk;
@@ -148,7 +186,8 @@ bool dnie_pa_rsa_sig_alg(const DerTlv* alg_seq, DnieHashAlg* hash, bool* pss, in
                     // MGF1 { id-mgf1, AlgorithmIdentifier hash }
                     DerIt m = der_enter(&v);
                     DerTlv moid, mh;
-                    if(!der_expect(&m, 0x06, &moid) || !der_oid_is(&moid, OID_MGF1, sizeof(OID_MGF1)) ||
+                    if(!der_expect(&m, 0x06, &moid) ||
+                       !der_oid_is(&moid, OID_MGF1, sizeof(OID_MGF1)) ||
                        !der_expect(&m, 0x30, &mh))
                         return false;
                     mgf_hash = alg_id_hash(&mh);
@@ -206,7 +245,8 @@ DniePaResult dnie_pa_rsa_pss_verify(
 
     // Bits del modulo: emBits = modBits - 1
     int top = 8;
-    while(top > 0 && !(n[0] & (1 << (top - 1)))) top--;
+    while(top > 0 && !(n[0] & (1 << (top - 1))))
+        top--;
     size_t mod_bits = (n_len - 1) * 8 + top;
     size_t em_bits = mod_bits - 1;
     size_t em_len = (em_bits + 7) / 8;
@@ -251,12 +291,14 @@ DniePaResult dnie_pa_rsa_pss_verify(
             dnie_hash_update(&hs, h, hl);
             dnie_hash_update(&hs, cnt, 4);
             dnie_hash_finish(&hs, t);
-            for(size_t k = 0; k < hl && off < db_len; k++) db[off++] ^= t[k];
+            for(size_t k = 0; k < hl && off < db_len; k++)
+                db[off++] ^= t[k];
         }
         db[0] &= 0xFF >> (8 * em_len - em_bits);
         // DB = 00..00 || 01 || sal
         size_t i = 0;
-        while(i < db_len && db[i] == 0) i++;
+        while(i < db_len && db[i] == 0)
+            i++;
         if(i >= db_len || db[i] != 0x01) break;
         i++;
         size_t sl = db_len - i;
@@ -298,7 +340,8 @@ static bool cert_rsa_key(const DerTlv* cert, DerTlv* n, DerTlv* e) {
     DerIt s = der_enter(&spki);
     if(!der_expect(&s, 0x30, &alg) || !der_expect(&s, 0x03, &bits)) return false;
     DerIt a = der_enter(&alg);
-    if(!der_expect(&a, 0x06, &oid) || !der_oid_is(&oid, OID_RSA_ENCRYPTION, sizeof(OID_RSA_ENCRYPTION)))
+    if(!der_expect(&a, 0x06, &oid) ||
+       !der_oid_is(&oid, OID_RSA_ENCRYPTION, sizeof(OID_RSA_ENCRYPTION)))
         return false;
     if(bits.len < 2 || bits.val[0] != 0) return false;
     DerIt k = der_it(bits.val + 1, bits.len - 1);
@@ -375,12 +418,12 @@ DniePaResult dnie_pa_verify_sod(const DnieSod* sod, DniePaInfo* info) {
     dnie_hash_update(&hs, sod->signed_attrs.raw + 1, sod->signed_attrs.raw_len - 1);
     if(!dnie_hash_finish(&hs, h)) return info->result = DniePaFormat;
 
-    info->result = pss ? dnie_pa_rsa_pss_verify(
-                             n.val, n.len, e.val, e.len, alg, h, sod->signature.val,
-                             sod->signature.len, salt) :
-                         dnie_pa_rsa_pkcs1_verify(
-                             n.val, n.len, e.val, e.len, alg, h, sod->signature.val,
-                             sod->signature.len);
+    info->result =
+        pss ?
+            dnie_pa_rsa_pss_verify(
+                n.val, n.len, e.val, e.len, alg, h, sod->signature.val, sod->signature.len, salt) :
+            dnie_pa_rsa_pkcs1_verify(
+                n.val, n.len, e.val, e.len, alg, h, sod->signature.val, sod->signature.len);
     return info->result;
 }
 

@@ -31,10 +31,8 @@ static DnieApp* dnie_app_alloc(void) {
     app->scene_manager = scene_manager_alloc(&dnie_scene_handlers, app);
 
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, dnie_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, dnie_back_event_callback);
+    view_dispatcher_set_custom_event_callback(app->view_dispatcher, dnie_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, dnie_back_event_callback);
 
     // Modulos GUI y su registro como Views
     app->submenu = submenu_alloc();
@@ -48,10 +46,10 @@ static DnieApp* dnie_app_alloc(void) {
     view_dispatcher_add_view(
         app->view_dispatcher, DnieViewSettings, variable_item_list_get_view(app->settings));
     dnie_sound_volume_load();
+    dnie_photo_wipe(); // restos de versiones antiguas o de un cierre inesperado
 
     app->widget = widget_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, DnieViewWidget, widget_get_view(app->widget));
+    view_dispatcher_add_view(app->view_dispatcher, DnieViewWidget, widget_get_view(app->widget));
 
     app->card_view = view_alloc();
     view_allocate_model(app->card_view, ViewModelTypeLockFree, sizeof(void*));

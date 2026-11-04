@@ -112,7 +112,8 @@ bool dnie_j2k_parse_header(const uint8_t* data, size_t len, DnieJ2kInfo* out) {
                 pos += hdr;
                 break;
             }
-            if(box_len == 1 || box_len < 8) return false; // cajas XL o raras: no las esperamos aqui
+            if(box_len == 1 || box_len < 8)
+                return false; // cajas XL o raras: no las esperamos aqui
             pos += box_len;
         }
     }

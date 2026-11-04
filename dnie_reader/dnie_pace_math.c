@@ -68,12 +68,16 @@ int dnie_pace_shared_x(
     mbedtls_ecp_point_init(&shared);
     ret = mbedtls_ecp_mul(grp, &shared, sk, pk_other, f_rng, p_rng);
     if(ret == 0 && mbedtls_ecp_is_zero(&shared)) ret = MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
-    if(ret == 0) ret = mbedtls_mpi_write_binary(&shared.MBEDTLS_PRIVATE(X), out, DNIE_EC_COORD_LEN);
+    if(ret == 0)
+        ret = mbedtls_mpi_write_binary(&shared.MBEDTLS_PRIVATE(X), out, DNIE_EC_COORD_LEN);
     mbedtls_ecp_point_free(&shared);
     return ret;
 }
 
-bool dnie_pace_derive_keys(const uint8_t k[DNIE_EC_COORD_LEN], uint8_t ks_enc[16], uint8_t ks_mac[16]) {
+bool dnie_pace_derive_keys(
+    const uint8_t k[DNIE_EC_COORD_LEN],
+    uint8_t ks_enc[16],
+    uint8_t ks_mac[16]) {
     return dnie_kdf_aes128(k, DNIE_EC_COORD_LEN, DNIE_KDF_ENC, ks_enc) &&
            dnie_kdf_aes128(k, DNIE_EC_COORD_LEN, DNIE_KDF_MAC, ks_mac);
 }

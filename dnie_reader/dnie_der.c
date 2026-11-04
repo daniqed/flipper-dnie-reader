@@ -26,7 +26,8 @@ bool der_next(DerIt* it, DerTlv* out) {
         int n = len & 0x7F;
         if(n == 0 || n > 3 || end - p < n) return false;
         len = 0;
-        while(n--) len = (len << 8) | *p++;
+        while(n--)
+            len = (len << 8) | *p++;
     }
     if((size_t)(end - p) < len) return false;
 
@@ -57,7 +58,8 @@ void der_oid_str(const DerTlv* oid, char* out, size_t size) {
         if(oid->val[i] & 0x80) continue;
         if(first) {
             uint32_t a = v < 40 ? 0 : (v < 80 ? 1 : 2);
-            pos += (size_t)snprintf(out + pos, size - pos, "%lu.%lu", (unsigned long)a, (unsigned long)(v - 40 * a));
+            pos += (size_t)snprintf(
+                out + pos, size - pos, "%lu.%lu", (unsigned long)a, (unsigned long)(v - 40 * a));
             first = false;
         } else {
             pos += (size_t)snprintf(out + pos, size - pos, ".%lu", (unsigned long)v);
@@ -74,7 +76,8 @@ bool der_uint(const DerTlv* t, uint32_t* out) {
         i = 1;
     }
     uint32_t v = 0;
-    for(; i < t->len; i++) v = (v << 8) | t->val[i];
+    for(; i < t->len; i++)
+        v = (v << 8) | t->val[i];
     *out = v;
     return true;
 }

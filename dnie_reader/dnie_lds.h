@@ -5,9 +5,9 @@
 #include "dnie_card.h"
 #include "dnie_sm.h"
 
-#define DNIE_DG1_MAX 128
-#define DNIE_FID_DG1 0x0101
-#define DNIE_FID_DG2 0x0102 // foto
+#define DNIE_DG1_MAX      128
+#define DNIE_FID_DG1      0x0101
+#define DNIE_FID_DG2      0x0102 // foto
 #define DNIE_LDS_MAX_FILE 0x7FFF // READ BINARY con offset de 15 bits
 
 typedef enum {

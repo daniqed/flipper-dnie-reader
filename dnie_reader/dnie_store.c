@@ -7,17 +7,19 @@
 #include <furi_hal_rtc.h>
 #include <storage/storage.h>
 
-#define TAG "DnieStore"
-#define KEY_SLOT FURI_HAL_CRYPTO_ENCLAVE_UNIQUE_KEY_SLOT
+#define TAG        "DnieStore"
+#define KEY_SLOT   FURI_HAL_CRYPTO_ENCLAVE_UNIQUE_KEY_SLOT
 #define FILE_MAGIC "DNIEREC1"
 #define HEADER_LEN (8 + 16 + 4)
 
 // --- Cifrado con la clave del enclave ---
 
-static bool enclave_crypt(bool encrypt, const uint8_t iv[16], const uint8_t* in, uint8_t* out, size_t len) {
+static bool
+    enclave_crypt(bool encrypt, const uint8_t iv[16], const uint8_t* in, uint8_t* out, size_t len) {
     if(!furi_hal_crypto_enclave_ensure_key(KEY_SLOT)) return false;
     if(!furi_hal_crypto_enclave_load_key(KEY_SLOT, iv)) return false;
-    bool ok = encrypt ? furi_hal_crypto_encrypt(in, out, len) : furi_hal_crypto_decrypt(in, out, len);
+    bool ok = encrypt ? furi_hal_crypto_encrypt(in, out, len) :
+                        furi_hal_crypto_decrypt(in, out, len);
     furi_hal_crypto_enclave_unload_key(KEY_SLOT);
     return ok;
 }
@@ -186,6 +188,27 @@ DnieStoreResult dnie_store_save(const DnieRecord* rec) {
     char path[128];
     if(f.found[0]) {
         strlcpy(path, f.found, sizeof(path));
+        // Se sustituye la lectura de la misma persona: conservar el nombre que le pusiste
+        if(!rec->alias[0]) {
+            DnieRecord* old = malloc(sizeof(DnieRecord));
+            if(old && dnie_store_load(path, old) == DnieStoreOk && old->alias[0]) {
+                DnieRecord* copy = malloc(sizeof(DnieRecord));
+                if(copy) {
+                    *copy = *rec;
+                    strlcpy(copy->alias, old->alias, sizeof(copy->alias));
+                    DnieStoreResult r = write_record(path, copy);
+                    memset(copy, 0, sizeof(DnieRecord));
+                    free(copy);
+                    memset(old, 0, sizeof(DnieRecord));
+                    free(old);
+                    return r;
+                }
+            }
+            if(old) {
+                memset(old, 0, sizeof(DnieRecord));
+                free(old);
+            }
+        }
     } else {
         if(f.count >= DNIE_STORE_MAX) return DnieStoreErrorFull;
         // Nombre neutro (sin datos personales): la fecha en segundos
@@ -213,7 +236,8 @@ static bool list_one(const char* path, void* context) {
     const char* given_src = NULL;
     const char* issuer = "";
     const char* sur_src = NULL;
-    if(ok && l->tmp->kind == DnieRecordFull && dnie_mrz_parse_dg1(l->tmp->dg1, l->tmp->dg1_len, &mrz)) {
+    if(ok && l->tmp->kind == DnieRecordFull &&
+       dnie_mrz_parse_dg1(l->tmp->dg1, l->tmp->dg1_len, &mrz)) {
         given_src = mrz.given_names;
         sur_src = mrz.surnames;
         issuer = mrz.issuer;
@@ -232,11 +256,17 @@ static bool list_one(const char* path, void* context) {
         sp = strchr(surname, ' ');
         if(sp) *sp = '\0';
         e->kind = l->tmp->kind;
+        if(l->tmp->alias[0]) {
+            // Nombre puesto por el usuario
+            strlcpy(given, l->tmp->alias, sizeof(given));
+            surname[0] = '\0';
+        }
         snprintf(
             e->label,
             sizeof(e->label),
-            "%s %s%s%s%s",
+            "%s%s%s%s%s%s",
             given,
+            surname[0] ? " " : "",
             surname,
             issuer[0] ? " - " : "",
             dnie_country_name(issuer),
@@ -264,4 +294,17 @@ bool dnie_store_delete(const char* path) {
     bool ok = storage_simply_remove(storage, path);
     furi_record_close(RECORD_STORAGE);
     return ok;
+}
+
+DnieStoreResult dnie_store_rename(const char* path, const char* alias) {
+    DnieRecord* rec = malloc(sizeof(DnieRecord));
+    if(!rec) return DnieStoreErrorCrypto;
+    DnieStoreResult r = dnie_store_load(path, rec);
+    if(r == DnieStoreOk) {
+        strlcpy(rec->alias, alias, sizeof(rec->alias));
+        r = write_record(path, rec);
+    }
+    memset(rec, 0, sizeof(DnieRecord));
+    free(rec);
+    return r;
 }

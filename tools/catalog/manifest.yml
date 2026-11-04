@@ -1,0 +1,16 @@
+# Copiar a: applications/NFC/dnie_reader/manifest.yml en tu fork de
+# https://github.com/flipperdevices/flipper-application-catalog
+sourcecode:
+  type: git
+  location:
+    origin: https://github.com/daniqed/flipper-dnie-reader.git
+    commit_sha: PEGA_AQUI_EL_SHA_DEL_COMMIT
+    subdir: dnie_reader
+short_description: Read eIDs and ePassports and verify that they are genuine
+description: "@./docs/README.md"
+changelog: "@./docs/changelog.md"
+screenshots:
+  - screenshots/ss0.png
+  - screenshots/ss1.png
+  - screenshots/ss2.png
+  - screenshots/ss3.png

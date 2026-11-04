@@ -7,8 +7,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DNIE_PIX_MAX_W 64
-#define DNIE_PIX_MAX_H 64
+#define DNIE_PIX_MAX_W  64
+#define DNIE_PIX_MAX_H  64
 #define DNIE_PIX_STRIDE ((DNIE_PIX_MAX_W + 7) / 8)
 
 typedef enum {

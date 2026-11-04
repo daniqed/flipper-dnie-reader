@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define DNIE_MRZ_LEN 90
+#define DNIE_MRZ_LEN     90
 #define DNIE_MRZ_TD3_LEN 88 // pasaporte: 2 lineas x 44
 
 typedef struct {

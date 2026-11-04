@@ -1,0 +1,15 @@
+# Compilados
+dist/
+.vscode/
+*.fap
+*.o
+*.elf
+
+# NUNCA subir datos personales: fotos, lecturas, volcados
+*.jp2
+!tests/ref_photo.jp2
+*.dnie
+*.nfc
+foto.*
+dg2.bin
+*.gray

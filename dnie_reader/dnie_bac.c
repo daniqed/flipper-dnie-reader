@@ -33,11 +33,13 @@ void dnie_bac_pace_password(const char* mrz_info, DniePacePassword* pw) {
 // Relleno ISO 9797-1 metodo 2 (80 00..) para el MAC
 static size_t pad8(uint8_t* buf, size_t len) {
     buf[len++] = 0x80;
-    while(len % 8) buf[len++] = 0x00;
+    while(len % 8)
+        buf[len++] = 0x00;
     return len;
 }
 
-DnieBacResult dnie_bac_establish(DnieTransport* poller, const char* mrz_info, DnieSm* sm, uint16_t* sw) {
+DnieBacResult
+    dnie_bac_establish(DnieTransport* poller, const char* mrz_info, DnieSm* sm, uint16_t* sw) {
     DnieBacResult r = DnieBacErrorCrypto;
     BitBuffer* tx = bit_buffer_alloc(64);
     BitBuffer* rx = bit_buffer_alloc(80);
@@ -101,7 +103,8 @@ DnieBacResult dnie_bac_establish(DnieTransport* poller, const char* mrz_info, Dn
         }
 
         // Claves de sesion: K.IFD xor K.IC.  SSC = RND.IC[4..8] || RND.IFD[4..8]
-        for(int i = 0; i < 16; i++) seed[i] = k_ifd[i] ^ dec[16 + i];
+        for(int i = 0; i < 16; i++)
+            seed[i] = k_ifd[i] ^ dec[16 + i];
         uint8_t ks_enc[16], ks_mac[16], ssc[8];
         if(!dnie_kdf_3des(seed, 16, 1, ks_enc) || !dnie_kdf_3des(seed, 16, 2, ks_mac)) break;
         memcpy(ssc, rnd_ic + 4, 4);

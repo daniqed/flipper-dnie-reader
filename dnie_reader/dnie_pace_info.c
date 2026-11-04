@@ -35,7 +35,8 @@ static bool tlv_next(const uint8_t** p, const uint8_t* end, Tlv* tlv) {
 static bool tlv_to_uint(const Tlv* tlv, uint32_t* out) {
     if(tlv->tag != 0x02 || tlv->len == 0 || tlv->len > 4) return false;
     uint32_t v = 0;
-    for(size_t i = 0; i < tlv->len; i++) v = (v << 8) | tlv->value[i];
+    for(size_t i = 0; i < tlv->len; i++)
+        v = (v << 8) | tlv->value[i];
     *out = v;
     return true;
 }

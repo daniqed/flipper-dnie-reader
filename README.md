@@ -25,7 +25,7 @@ A [Flipper Zero](https://flipperzero.one) app that reads **electronic identity d
   - Full-screen **"NOT AUTHENTIC"** warning when something does not match.
 - **Sounds**: the issuing country's **national anthem** when the document is genuine, a low "wah-wah" when it is not. The music stops immediately when you leave the app.
 - **Saved readings**, encrypted with the Flipper's unique enclave key. Two modes: full document, or *album* (name, photo, birthday and country only). Opening a saved reading plays its country's anthem.
-- **English interface**, with an anthem volume setting (Off, 25-100 %).
+- **English interface**, with an anthem volume setting (Off, 25-100 %) and a **Demo** mode with a fictitious sample ID (for screenshots, cannot be saved).
 
 ## Supported documents
 

@@ -19,7 +19,8 @@ void dnie_scene_saved_list_on_enter(void* context) {
     // La lista solo ocupa memoria mientras se ve (unos 4 KB)
     if(!app->saved_entries) app->saved_entries = malloc(sizeof(DnieSavedEntry) * DNIE_STORE_MAX);
     // Se descifra cada lectura para mostrar el nombre (puede tardar un instante)
-    app->saved_count = app->saved_entries ? dnie_store_list(app->saved_entries, DNIE_STORE_MAX) : 0;
+    app->saved_count = app->saved_entries ? dnie_store_list(app->saved_entries, DNIE_STORE_MAX) :
+                                            0;
     for(size_t i = 0; i < app->saved_count; i++) {
         submenu_add_item(
             submenu, app->saved_entries[i].label, i, dnie_scene_saved_list_callback, app);
@@ -56,9 +57,11 @@ static bool load_saved(DnieApp* app, size_t index) {
             app->mrz_ok = dnie_mrz_parse_dg1(app->dg1, app->dg1_len, &app->mrz);
         }
         app->saved_at = rec->saved_at;
+        strlcpy(app->saved_alias, rec->alias, sizeof(app->saved_alias));
         strlcpy(app->saved_path, app->saved_entries[index].path, sizeof(app->saved_path));
 
         app->viewing_saved = true;
+        app->demo = false;
         app->photo_decode_tried = true; // la foto viene ya escalada: no hay que decodificar
         memset(&app->pix, 0, sizeof(app->pix));
         if(rec->has_photo) {
@@ -66,8 +69,9 @@ static bool load_saved(DnieApp* app, size_t index) {
             if(app->pix_src) {
                 *app->pix_src = rec->photo;
                 app->photo_decode_result =
-                    dnie_pixelart_dither(app->pix_src, app->dither, &app->pix) ? DnieJ2kOk :
-                                                                                 DnieJ2kErrorMemory;
+                    dnie_pixelart_dither(app->pix_src, app->dither, &app->pix) ?
+                        DnieJ2kOk :
+                        DnieJ2kErrorMemory;
             }
         } else {
             app->photo_decode_result = DnieJ2kErrorFormat;

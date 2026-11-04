@@ -25,6 +25,7 @@ void dnie_bac_mrz_info(const char* doc_number, const char* birth, const char* ex
 void dnie_bac_pace_password(const char* mrz_info, DniePacePassword* pw);
 
 // BAC completo: al terminar OK, sm es un canal 3DES listo para leer.
-DnieBacResult dnie_bac_establish(DnieTransport* poller, const char* mrz_info, DnieSm* sm, uint16_t* sw);
+DnieBacResult
+    dnie_bac_establish(DnieTransport* poller, const char* mrz_info, DnieSm* sm, uint16_t* sw);
 
 const char* dnie_bac_result_str(DnieBacResult r);

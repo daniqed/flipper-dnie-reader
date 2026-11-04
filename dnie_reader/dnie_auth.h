@@ -11,9 +11,9 @@
 #include "dnie_csca.h"
 #include "dnie_ca.h"
 
-#define DNIE_FID_SOD 0x011D
+#define DNIE_FID_SOD  0x011D
 #define DNIE_FID_DG14 0x010E
-#define DNIE_SOD_MAX 6144
+#define DNIE_SOD_MAX  6144
 #define DNIE_DG14_MAX 1024
 
 typedef enum {

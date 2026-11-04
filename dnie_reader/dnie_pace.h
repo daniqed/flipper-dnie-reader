@@ -3,7 +3,7 @@
 #include "dnie_card.h"
 #include "dnie_pace_info.h"
 
-#define DNIE_NONCE_LEN 16 // AES: el nonce mide un bloque
+#define DNIE_NONCE_LEN  16 // AES: el nonce mide un bloque
 #define DNIE_PACE_STEPS 4 // nonce, mapeo, ECDH, tokens
 
 typedef enum {

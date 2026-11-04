@@ -34,3 +34,6 @@ size_t dnie_store_list(DnieSavedEntry* out, size_t max);
 DnieStoreResult dnie_store_load(const char* path, DnieRecord* out);
 
 bool dnie_store_delete(const char* path);
+
+// Cambia el nombre que se muestra (alias) de una lectura guardada. "" = volver al del documento.
+DnieStoreResult dnie_store_rename(const char* path, const char* alias);

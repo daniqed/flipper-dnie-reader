@@ -7,16 +7,16 @@
 #include <mbedtls/ecp.h>
 #include <mbedtls/bignum.h>
 
-#define TAG "DniePace"
+#define TAG   "DniePace"
 #define SW_OK 0x9000
 
 #define PACE_MAPPING_ECDH_GM 2
-#define PACE_CIPHER_AES128 2
-#define PACE_PARAM_BP256R1 13
-#define PACE_PASSWORD_CAN 0x02
+#define PACE_CIPHER_AES128   2
+#define PACE_PARAM_BP256R1   13
+#define PACE_PASSWORD_CAN    0x02
 
 #define DNIE_ECC_STACK_SIZE (8 * 1024) // mbedtls ECP usa bastante pila
-#define DNIE_RX_SIZE 160
+#define DNIE_RX_SIZE        160
 
 static const uint8_t ID_PACE_PREFIX[] = {0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04};
 
@@ -60,7 +60,8 @@ static int dnie_ecc_run_op(DnieEccCtx* c) {
     switch(c->op) {
     case DnieEccOpMapKeypair:
         if((ret = dnie_ec_load_bp256r1(&c->grp)) != 0) break;
-        if((ret = dnie_pace_keypair(&c->grp, &c->grp.G, &c->sk_map, &a, true, dnie_rng, NULL)) != 0)
+        if((ret = dnie_pace_keypair(&c->grp, &c->grp.G, &c->sk_map, &a, true, dnie_rng, NULL)) !=
+           0)
             break;
         ret = dnie_ec_point_write(&c->grp, &a, c->pk_map);
         break;
@@ -116,12 +117,15 @@ static int dnie_ecc_run(DnieEccCtx* c, DnieEccOp op, uint32_t* elapsed_ms) {
     // Sin un hueco para la pila del hilo (+ margen para mbedtls) el malloc colgaria el Flipper
     if(memmgr_heap_get_max_free_block() < DNIE_ECC_STACK_SIZE + 2048 ||
        memmgr_get_free_heap() < DNIE_ECC_STACK_SIZE + 8192) {
-        FURI_LOG_E(TAG, "Sin memoria para ECC (libre %u, bloque %u)", memmgr_get_free_heap(), memmgr_heap_get_max_free_block());
+        FURI_LOG_E(
+            TAG,
+            "Sin memoria para ECC (libre %u, bloque %u)",
+            memmgr_get_free_heap(),
+            memmgr_heap_get_max_free_block());
         return -2;
     }
     uint32_t t0 = furi_get_tick();
-    FuriThread* thread =
-        furi_thread_alloc_ex("DnieEcc", DNIE_ECC_STACK_SIZE, dnie_ecc_thread, c);
+    FuriThread* thread = furi_thread_alloc_ex("DnieEcc", DNIE_ECC_STACK_SIZE, dnie_ecc_thread, c);
     furi_thread_start(thread);
     furi_thread_join(thread);
     furi_thread_free(thread);
@@ -283,8 +287,18 @@ DniePaceResult dnie_pace_establish(
             break;
         }
         if(!dnie_pace_ga(
-               poller, tx, rx, true, 0x81, c->pk_map, DNIE_EC_POINT_LEN, 0x82,
-               c->pk_map_chip, DNIE_EC_POINT_LEN, &state->sw, &found)) {
+               poller,
+               tx,
+               rx,
+               true,
+               0x81,
+               c->pk_map,
+               DNIE_EC_POINT_LEN,
+               0x82,
+               c->pk_map_chip,
+               DNIE_EC_POINT_LEN,
+               &state->sw,
+               &found)) {
             result = DniePaceErrorTransport;
             break;
         }
@@ -306,8 +320,18 @@ DniePaceResult dnie_pace_establish(
             break;
         }
         if(!dnie_pace_ga(
-               poller, tx, rx, true, 0x83, c->pk_eph, DNIE_EC_POINT_LEN, 0x84, c->pk_chip,
-               DNIE_EC_POINT_LEN, &state->sw, &found)) {
+               poller,
+               tx,
+               rx,
+               true,
+               0x83,
+               c->pk_eph,
+               DNIE_EC_POINT_LEN,
+               0x84,
+               c->pk_chip,
+               DNIE_EC_POINT_LEN,
+               &state->sw,
+               &found)) {
             result = DniePaceErrorTransport;
             break;
         }
@@ -327,7 +351,8 @@ DniePaceResult dnie_pace_establish(
         // ---- Paso 4: tokens de autenticacion mutua ----
         state->step = 4;
         if(progress) progress(4, progress_context);
-        uint8_t t_pcd[DNIE_PACE_TOKEN_LEN], t_chip[DNIE_PACE_TOKEN_LEN], t_exp[DNIE_PACE_TOKEN_LEN];
+        uint8_t t_pcd[DNIE_PACE_TOKEN_LEN], t_chip[DNIE_PACE_TOKEN_LEN],
+            t_exp[DNIE_PACE_TOKEN_LEN];
         if(!dnie_pace_token(c->ks_mac, oid, c->pk_chip, t_pcd) ||
            !dnie_pace_token(c->ks_mac, oid, c->pk_eph, t_exp)) {
             result = DniePaceErrorCrypto;
@@ -335,8 +360,18 @@ DniePaceResult dnie_pace_establish(
         }
         // Ultimo GA: CLA 00 (fin del encadenamiento)
         if(!dnie_pace_ga(
-               poller, tx, rx, false, 0x85, t_pcd, sizeof(t_pcd), 0x86, t_chip, sizeof(t_chip),
-               &state->sw, &found)) {
+               poller,
+               tx,
+               rx,
+               false,
+               0x85,
+               t_pcd,
+               sizeof(t_pcd),
+               0x86,
+               t_chip,
+               sizeof(t_chip),
+               &state->sw,
+               &found)) {
             result = DniePaceErrorTransport;
             break;
         }

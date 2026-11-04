@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-#define SM_MAC_LEN 8
+#define SM_MAC_LEN  8
 #define SM_MAX_DATA 240 // tamano maximo de datos que protegemos/aceptamos
 
 static void ssc_increment(DnieSm* sm) {
@@ -22,7 +22,8 @@ static size_t pad_m2(uint8_t* buf, size_t len, size_t max, size_t block) {
 }
 
 static bool unpad_m2(const uint8_t* buf, size_t len, size_t* out_len) {
-    while(len > 0 && buf[len - 1] == 0x00) len--;
+    while(len > 0 && buf[len - 1] == 0x00)
+        len--;
     if(len == 0 || buf[len - 1] != 0x80) return false;
     *out_len = len - 1;
     return true;
@@ -71,7 +72,11 @@ void dnie_sm_init(DnieSm* sm, const uint8_t ks_enc[16], const uint8_t ks_mac[16]
     memset(sm->ssc, 0, DNIE_SM_BLOCK); // AES: SSC = 0 tras PACE
 }
 
-void dnie_sm_init_3des(DnieSm* sm, const uint8_t ks_enc[16], const uint8_t ks_mac[16], const uint8_t* ssc8) {
+void dnie_sm_init_3des(
+    DnieSm* sm,
+    const uint8_t ks_enc[16],
+    const uint8_t ks_mac[16],
+    const uint8_t* ssc8) {
     sm->cipher = DnieSmCipher3Des;
     sm->block = 8;
     memcpy(sm->ks_enc, ks_enc, 16);
@@ -212,7 +217,8 @@ DnieSmResult dnie_sm_unwrap(
     uint8_t expected[SM_MAC_LEN];
     if(!sm_mac(sm, k, k_len, expected)) return DnieSmErrorCrypto;
     uint8_t diff = 0;
-    for(int i = 0; i < SM_MAC_LEN; i++) diff |= (uint8_t)(expected[i] ^ mac[i]);
+    for(int i = 0; i < SM_MAC_LEN; i++)
+        diff |= (uint8_t)(expected[i] ^ mac[i]);
     if(diff != 0) return DnieSmErrorMac;
 
     *sw = (uint16_t)(do99[2] << 8 | do99[3]);

@@ -5,8 +5,8 @@
 #include <string.h>
 #include <furi_hal_random.h>
 
-#define TAG "DnieCa"
-#define SW_OK 0x9000
+#define TAG      "DnieCa"
+#define SW_OK    0x9000
 #define CA_STACK (8 * 1024) // mbedtls ECP en un hilo con pila grande, como en PACE
 
 typedef struct {
@@ -37,7 +37,8 @@ static int ca_ecc(CaEcc* c) {
         // Solo brainpoolP256r1 (la del DNIe): cargar NIST P-256 arrastraria ~4 KB de codigo
         if((ret = dnie_ec_load_bp256r1(&grp))) break;
         // Clave estatica del chip (de DG14): tiene que ser un punto valido de la curva
-        if((ret = dnie_ec_point_read(&grp, &chip, c->key->public_key, c->key->public_key_len))) break;
+        if((ret = dnie_ec_point_read(&grp, &chip, c->key->public_key, c->key->public_key_len)))
+            break;
         // Par efimero y secreto compartido
         if((ret = dnie_pace_keypair(&grp, &grp.G, &sk, &pk, true, ca_rng, NULL))) break;
         if((ret = dnie_ec_point_write(&grp, &pk, c->pk_eph))) break;

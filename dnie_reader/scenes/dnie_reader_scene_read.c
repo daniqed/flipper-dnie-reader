@@ -33,7 +33,16 @@ static void dnie_scene_read_draw(DnieApp* app) {
 
     widget_reset(widget);
     widget_add_string_element(
-        widget, 64, 2, AlignCenter, AlignTop, FontPrimary, step == 0 ? (app->foreign_id ? "Hold the document" : app->passport ? "Hold the passport" : "Hold the ID") : (step <= DNIE_PACE_STEPS ? "PACE in progress" : "Secure channel OK"));
+        widget,
+        64,
+        2,
+        AlignCenter,
+        AlignTop,
+        FontPrimary,
+        step == 0 ? (app->foreign_id ? "Hold the document" :
+                     app->passport   ? "Hold the passport" :
+                                       "Hold the ID") :
+                    (step <= DNIE_PACE_STEPS ? "PACE in progress" : "Secure channel OK"));
     widget_add_string_multiline_element(
         widget,
         64,
@@ -41,7 +50,10 @@ static void dnie_scene_read_draw(DnieApp* app) {
         AlignCenter,
         AlignTop,
         FontSecondary,
-        step ? "Don't move it,\nthis may take a\nfew seconds" : (app->passport && !app->foreign_id ? "(photo page)\nto the back of\nthe Flipper" : "to the back of the\nFlipper; don't\nmove it"));
+        step ?
+            "Don't move it,\nthis may take a\nfew seconds" :
+            (app->passport && !app->foreign_id ? "(photo page)\nto the back of\nthe Flipper" :
+                                                 "to the back of the\nFlipper; don't\nmove it"));
     if(step == DNIE_STEP_PHOTO) {
         char line[32];
         snprintf(line, sizeof(line), "%s: %u%%", DNIE_STEP_NAMES[step], app->photo_percent);
@@ -82,7 +94,8 @@ static NfcCommand dnie_scene_read_poller_callback(NfcGenericEvent event, void* c
     DnieTransport transport = {.protocol = event.protocol, .poller = event.instance};
     DnieTransport* tr = &transport;
     char mrz_info[25];
-    if(app->passport) dnie_bac_mrz_info(app->pass_number, app->pass_birth, app->pass_expiry, mrz_info);
+    if(app->passport)
+        dnie_bac_mrz_info(app->pass_number, app->pass_birth, app->pass_expiry, mrz_info);
 
     bool ok = false;
     FURI_LOG_I(
@@ -93,11 +106,7 @@ static NfcCommand dnie_scene_read_poller_callback(NfcGenericEvent event, void* c
     do {
         // Paso A: EF.CardAccess (publico). En pasaportes antiguos no existe: BAC.
         app->read_result = dnie_card_read_card_access(
-            tr,
-            app->card_access,
-            sizeof(app->card_access),
-            &app->card_access_len,
-            &app->last_sw);
+            tr, app->card_access, sizeof(app->card_access), &app->card_access_len, &app->last_sw);
         if(app->read_result == DnieCardErrorTransport) break;
         bool pace = false;
         if(app->read_result == DnieCardOk) {
@@ -122,7 +131,8 @@ static NfcCommand dnie_scene_read_poller_callback(NfcGenericEvent event, void* c
                 pw.len = strlen(app->can);
                 memcpy(pw.secret, app->can, pw.len);
             }
-            app->pace_result = dnie_pace_establish(tr, &pw, &app->pace, dnie_scene_read_progress, app);
+            app->pace_result =
+                dnie_pace_establish(tr, &pw, &app->pace, dnie_scene_read_progress, app);
             memset(&pw, 0, sizeof(pw));
             if(app->pace_result != DniePaceOk) break;
             dnie_sm_init(&sm, app->pace.ks_enc, app->pace.ks_mac);
@@ -146,8 +156,7 @@ static NfcCommand dnie_scene_read_poller_callback(NfcGenericEvent event, void* c
         dnie_scene_read_progress(DNIE_PACE_STEPS + 1, app);
 
         if(dnie_lds_select_app(tr, &sm, &app->lds) == DnieLdsOk) {
-            dnie_lds_read_dg1(
-                tr, &sm, app->dg1, sizeof(app->dg1), &app->dg1_len, &app->lds);
+            dnie_lds_read_dg1(tr, &sm, app->dg1, sizeof(app->dg1), &app->dg1_len, &app->lds);
         }
         if(app->lds.result != DnieLdsOk) {
             dnie_sm_clear(&sm);
@@ -166,19 +175,15 @@ static NfcCommand dnie_scene_read_poller_callback(NfcGenericEvent event, void* c
         DnieHash dg2_hash;
         bool hashing = dnie_auth_dg2_hash_start(&app->auth, &dg2_hash);
         DnieLdsResult pr = dnie_photo_read_dg2(
-            tr,
-            &sm,
-            &app->photo,
-            dnie_scene_read_photo_progress,
-            app,
-            hashing ? &dg2_hash : NULL);
+            tr, &sm, &app->photo, dnie_scene_read_photo_progress, app, hashing ? &dg2_hash : NULL);
         if(hashing) dnie_auth_dg2_hash_done(&app->auth, &dg2_hash, pr == DnieLdsOk);
 
         // Paso F: Chip Authentication (al final: cambia el canal a 3DES con claves nuevas)
         if(app->auth.dg14_ok && pr != DnieLdsErrorSm && pr != DnieLdsErrorTransport) {
             dnie_scene_read_progress(DNIE_PACE_STEPS + 4, app);
             dnie_ca_run(tr, &sm, &app->auth.dg14, app->dg1, &app->auth.ca);
-            FURI_LOG_I("DnieRead", "Chip Auth: %d (SW %04X)", app->auth.ca.result, app->auth.ca.sw);
+            FURI_LOG_I(
+                "DnieRead", "Chip Auth: %d (SW %04X)", app->auth.ca.result, app->auth.ca.sw);
         }
         dnie_sm_clear(&sm);
         dnie_auth_compact(&app->auth); // fuera SOD y DG14: liberamos memoria para la foto
@@ -225,6 +230,7 @@ void dnie_scene_read_on_enter(void* context) {
     app->photo_decode_tried = false;
     app->viewing_saved = false;
     app->viewing_album = false;
+    app->demo = false;
     dnie_auth_reset(&app->auth);
     app->photo_decode_result = DnieJ2kErrorFormat;
     memset(&app->pix, 0, sizeof(app->pix));
@@ -292,7 +298,7 @@ bool dnie_scene_read_on_event(void* context, SceneManagerEvent event) {
             app->card_hint_pending = card; // en el carnet: "Up: save"
             scene_manager_next_scene(
                 app->scene_manager,
-                !card                 ? DnieSceneResult :
+                !card                ? DnieSceneResult :
                 v == DnieVerdictFake ? DnieSceneWarning :
                                        DnieSceneCard);
             consumed = true;

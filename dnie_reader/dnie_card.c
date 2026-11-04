@@ -1,8 +1,8 @@
 #include "dnie_card.h"
 
-#define TAG "DnieCard"
+#define TAG             "DnieCard"
 #define DNIE_READ_CHUNK 0x80 // bytes por READ BINARY (conservador para el tamano de trama)
-#define SW_OK 0x9000
+#define SW_OK           0x9000
 
 // Envia una APDU y devuelve el status word (SW1SW2). Los datos quedan en rx (sin el SW).
 bool dnie_card_apdu(

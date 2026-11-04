@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include "dnie_ec.h"
 
-#define DNIE_PACE_OID_LEN 10 // 04 00 7F 00 07 02 02 04 <mapping> <cipher>
+#define DNIE_PACE_OID_LEN   10 // 04 00 7F 00 07 02 02 04 <mapping> <cipher>
 #define DNIE_PACE_TOKEN_LEN 8
 
 // pk = sk * base. Si gen_sk, genera antes un sk aleatorio en [1, n-1].
@@ -40,7 +40,10 @@ int dnie_pace_shared_x(
     void* p_rng);
 
 // KSenc = KDF(K,1), KSmac = KDF(K,2)
-bool dnie_pace_derive_keys(const uint8_t k[DNIE_EC_COORD_LEN], uint8_t ks_enc[16], uint8_t ks_mac[16]);
+bool dnie_pace_derive_keys(
+    const uint8_t k[DNIE_EC_COORD_LEN],
+    uint8_t ks_enc[16],
+    uint8_t ks_mac[16]);
 
 // T = CMAC(KSmac, 7F49 { 06 OID, 86 PK })[0..8]
 bool dnie_pace_token(

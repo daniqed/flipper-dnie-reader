@@ -1,6 +1,6 @@
 #include "dnie_photo.h"
 
-#define TAG "DniePhoto"
+#define TAG        "DniePhoto"
 #define COPY_CHUNK 512
 
 typedef struct {
@@ -45,16 +45,13 @@ DnieLdsResult dnie_photo_read_dg2(
         photo->lds.result = r = DnieLdsErrorSink;
     } else {
         FileSink sink = {
-            .file = file, .hash = hash, .progress = progress, .context = context, .last_percent = 0};
+            .file = file,
+            .hash = hash,
+            .progress = progress,
+            .context = context,
+            .last_percent = 0};
         r = dnie_lds_read_file(
-            poller,
-            sm,
-            DNIE_FID_DG2,
-            file_sink,
-            file_progress,
-            &sink,
-            &photo->dg2_len,
-            &photo->lds);
+            poller, sm, DNIE_FID_DG2, file_sink, file_progress, &sink, &photo->dg2_len, &photo->lds);
         storage_file_close(file);
     }
     storage_file_free(file);

@@ -40,7 +40,11 @@ typedef enum {
 
 void dnie_sm_init(DnieSm* sm, const uint8_t ks_enc[16], const uint8_t ks_mac[16]); // AES, SSC=0
 // 3DES con el SSC inicial dado (8 bytes; NULL = 0, que es lo que pide Chip Authentication)
-void dnie_sm_init_3des(DnieSm* sm, const uint8_t ks_enc[16], const uint8_t ks_mac[16], const uint8_t* ssc8);
+void dnie_sm_init_3des(
+    DnieSm* sm,
+    const uint8_t ks_enc[16],
+    const uint8_t ks_mac[16],
+    const uint8_t* ssc8);
 void dnie_sm_clear(DnieSm* sm); // borra las claves de memoria
 
 // Protege un comando. hdr = CLA INS P1 P2 (sin proteger). data/len opcionales.

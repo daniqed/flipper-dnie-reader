@@ -101,7 +101,8 @@ static bool input_input(InputEvent* event, void* context) {
                 case DnieInputPassNumber: {
                     // Sin los huecos del final
                     size_t n = m->len;
-                    while(n > 0 && v[n - 1] == '<') n--;
+                    while(n > 0 && v[n - 1] == '<')
+                        n--;
                     v[n] = '\0';
                     strlcpy(app->pass_number, v, sizeof(app->pass_number));
                     break;
@@ -154,7 +155,8 @@ static void fill_model(DnieApp* app, InputModel* m) {
         m->title = app->foreign_id ? "Document No." : "Passport No.";
         m->hint = app->foreign_id ? "As in the MRZ" : "E.g.: PAA123456";
         size_t n = strlen(app->pass_number);
-        for(int i = 0; i < m->len; i++) m->chars[i] = i < (int)n ? app->pass_number[i] : '<';
+        for(int i = 0; i < m->len; i++)
+            m->chars[i] = i < (int)n ? app->pass_number[i] : '<';
         if(n == 0) memcpy(m->chars, "PAA000000", 9);
         break;
     }

@@ -7,7 +7,7 @@
 #include "dnie_csca_keys.inc"
 
 #define CSCA_COUNT (sizeof(DNIE_CSCA_KEYS) / sizeof(DNIE_CSCA_KEYS[0]))
-#define REC_MAX 1024
+#define REC_MAX    1024
 
 typedef struct {
     DnieHashAlg hash;
@@ -18,10 +18,11 @@ typedef struct {
     size_t sig_len;
 } Sig;
 
-static DnieCscaResult try_key(const uint8_t* n, size_t nl, const uint8_t* e, size_t el, const Sig* s) {
-    DniePaResult r = s->pss ?
-                         dnie_pa_rsa_pss_verify(n, nl, e, el, s->hash, s->h, s->sig, s->sig_len, s->salt) :
-                         dnie_pa_rsa_pkcs1_verify(n, nl, e, el, s->hash, s->h, s->sig, s->sig_len);
+static DnieCscaResult
+    try_key(const uint8_t* n, size_t nl, const uint8_t* e, size_t el, const Sig* s) {
+    DniePaResult r =
+        s->pss ? dnie_pa_rsa_pss_verify(n, nl, e, el, s->hash, s->h, s->sig, s->sig_len, s->salt) :
+                 dnie_pa_rsa_pkcs1_verify(n, nl, e, el, s->hash, s->h, s->sig, s->sig_len);
     if(r == DniePaOk) return DnieCscaOk;
     if(r == DniePaBadSignature) return DnieCscaBadSignature;
     return DnieCscaFormat;
@@ -100,8 +101,8 @@ DnieCscaResult
     memset(info, 0, sizeof(*info));
     DerIt c = der_enter(cert);
     DerTlv tbs, alg, sig, f, issuer;
-    if(!der_expect(&c, 0x30, &tbs) || !der_expect(&c, 0x30, &alg) ||
-       !der_expect(&c, 0x03, &sig) || sig.len < 2 || sig.val[0] != 0)
+    if(!der_expect(&c, 0x30, &tbs) || !der_expect(&c, 0x30, &alg) || !der_expect(&c, 0x03, &sig) ||
+       sig.len < 2 || sig.val[0] != 0)
         return info->result = DnieCscaFormat;
 
     DerIt t = der_enter(&tbs);

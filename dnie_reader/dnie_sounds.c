@@ -34,7 +34,7 @@ typedef struct {
 // Marcha Real (Espinosa, 1761, dominio publico). Melodia de la partitura para piano de
 // Wikimedia Commons ("Marcha Real de España.pdf"), en Do mayor: frase A (con la 2a casilla)
 // y frase B, sin repeticiones. Negra = 400 ms.
-#define Q 400
+#define Q   400
 #define G4_ 392.00f
 #define A4_ 440.00f
 #define B4_ 493.88f
@@ -45,28 +45,72 @@ typedef struct {
 #define G5_ 783.99f
 static const Note ANTHEM_ES[] = {
     // A
-    {C5_, Q}, {G4_, Q}, {E5_, Q}, {C5_, Q / 2}, {G5_, Q / 2},
-    {F5_, Q / 2}, {E5_, Q / 2}, {D5_, Q / 2}, {C5_, Q / 2},
-    {C5_, Q / 2}, {B4_, Q / 2}, {A4_, Q / 2}, {G4_, Q / 2},
-    {C5_, Q}, {D5_, Q}, {E5_, Q}, {0, Q / 2}, {G5_, Q / 2},
-    {F5_, Q / 2}, {E5_, Q / 2}, {D5_, Q / 2}, {C5_, Q / 2}, {G5_, Q * 2},
+    {C5_, Q},
+    {G4_, Q},
+    {E5_, Q},
+    {C5_, Q / 2},
+    {G5_, Q / 2},
+    {F5_, Q / 2},
+    {E5_, Q / 2},
+    {D5_, Q / 2},
+    {C5_, Q / 2},
+    {C5_, Q / 2},
+    {B4_, Q / 2},
+    {A4_, Q / 2},
+    {G4_, Q / 2},
+    {C5_, Q},
+    {D5_, Q},
+    {E5_, Q},
+    {0, Q / 2},
+    {G5_, Q / 2},
+    {F5_, Q / 2},
+    {E5_, Q / 2},
+    {D5_, Q / 2},
+    {C5_, Q / 2},
+    {G5_, Q * 2},
     // B
-    {G5_, Q}, {E5_, Q * 3 / 4}, {G5_, Q / 4}, {F5_, Q}, {D5_, Q * 3 / 4}, {F5_, Q / 4},
-    {E5_, Q}, {C5_, Q * 3 / 4}, {E5_, Q / 4}, {D5_, Q / 2}, {G4_, Q / 2}, {A4_, Q / 2}, {B4_, Q / 2},
-    {C5_, Q}, {D5_, Q}, {E5_, Q * 3 / 4}, {F5_, Q / 4}, {G5_, Q * 3 / 4}, {F5_, Q / 4},
-    {E5_, Q}, {D5_, Q}, {C5_, Q * 2},
+    {G5_, Q},
+    {E5_, Q * 3 / 4},
+    {G5_, Q / 4},
+    {F5_, Q},
+    {D5_, Q * 3 / 4},
+    {F5_, Q / 4},
+    {E5_, Q},
+    {C5_, Q * 3 / 4},
+    {E5_, Q / 4},
+    {D5_, Q / 2},
+    {G4_, Q / 2},
+    {A4_, Q / 2},
+    {B4_, Q / 2},
+    {C5_, Q},
+    {D5_, Q},
+    {E5_, Q * 3 / 4},
+    {F5_, Q / 4},
+    {G5_, Q * 3 / 4},
+    {F5_, Q / 4},
+    {E5_, Q},
+    {D5_, Q},
+    {C5_, Q * 2},
 };
 
 #include "dnie_anthems.inc"
 
 // Pais sin himno en la app: fanfarria corta
 static const Note FANFARE[] = {
-    {523.25f, 150}, {659.25f, 150}, {783.99f, 150}, {1046.50f, 450}, {783.99f, 150}, {1046.50f, 600},
+    {523.25f, 150},
+    {659.25f, 150},
+    {783.99f, 150},
+    {1046.50f, 450},
+    {783.99f, 150},
+    {1046.50f, 600},
 };
 
 // "Wah wah wah waaah": cromatico descendente y grave
 static const Note FAKE[] = {
-    {196.00f, 300}, {185.00f, 300}, {174.61f, 300}, {164.81f, 1000},
+    {196.00f, 300},
+    {185.00f, 300},
+    {174.61f, 300},
+    {164.81f, 1000},
 };
 
 #define ANTHEM(cc, code) {cc, ANTHEM_##code, sizeof(ANTHEM_##code) / sizeof(Note)}
@@ -75,9 +119,18 @@ static const struct {
     const Note* notes;
     size_t n;
 } ANTHEMS[] = {
-    ANTHEM("ESP", ES), ANTHEM("USA", US), ANTHEM("FRA", FR), ANTHEM("GBR", GB),
-    ANTHEM("CAN", CA), ANTHEM("JPN", JP), ANTHEM("CHN", CN), ANTHEM("IDN", ID),
-    ANTHEM("D", DE), ANTHEM("DEU", DE), ANTHEM("ITA", IT), ANTHEM("NLD", NL),
+    ANTHEM("ESP", ES),
+    ANTHEM("USA", US),
+    ANTHEM("FRA", FR),
+    ANTHEM("GBR", GB),
+    ANTHEM("CAN", CA),
+    ANTHEM("JPN", JP),
+    ANTHEM("CHN", CN),
+    ANTHEM("IDN", ID),
+    ANTHEM("D", DE),
+    ANTHEM("DEU", DE),
+    ANTHEM("ITA", IT),
+    ANTHEM("NLD", NL),
 };
 
 typedef struct {
@@ -117,7 +170,8 @@ void dnie_sound_volume_set(uint8_t level) {
     storage_simply_mkdir(storage, EXT_PATH("apps_data"));
     storage_simply_mkdir(storage, EXT_PATH("apps_data/dnie_reader"));
     File* f = storage_file_alloc(storage);
-    if(storage_file_open(f, VOLUME_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) storage_file_write(f, &level, 1);
+    if(storage_file_open(f, VOLUME_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS))
+        storage_file_write(f, &level, 1);
     storage_file_close(f);
     storage_file_free(f);
     furi_record_close(RECORD_STORAGE);

@@ -11,7 +11,8 @@ static bool sha256(const uint8_t* data, size_t len, uint8_t out[32]) {
 
 static size_t safe_strlen(const char* s, size_t max) {
     size_t n = 0;
-    while(n < max && s[n]) n++;
+    while(n < max && s[n])
+        n++;
     return n;
 }
 
@@ -29,7 +30,8 @@ size_t dnie_record_pack(const DnieRecord* rec, uint8_t* out, size_t max) {
     } else {
         return 0;
     }
-    size_t body = 4 + 1 + 1 + 4 + payload + 2 + photo_len;
+    size_t alias_len = safe_strlen(rec->alias, DNIE_RECORD_ALIAS_MAX - 1);
+    size_t body = 4 + 1 + 1 + 4 + payload + 1 + alias_len + 2 + photo_len;
     size_t padded = ((body + 32) / 16 + 1) * 16;
     if(padded > max) return 0;
 
@@ -59,6 +61,9 @@ size_t dnie_record_pack(const DnieRecord* rec, uint8_t* out, size_t max) {
         memcpy(&out[i], rec->issuer, safe_strlen(rec->issuer, 3));
         i += 3;
     }
+    out[i++] = (uint8_t)alias_len;
+    memcpy(&out[i], rec->alias, alias_len);
+    i += alias_len;
     out[i++] = rec->has_photo ? rec->photo.width : 0;
     out[i++] = rec->has_photo ? rec->photo.height : 0;
     if(photo_len) memcpy(&out[i], rec->photo.gray, photo_len);
@@ -94,15 +99,15 @@ bool dnie_record_unpack(const uint8_t* in, size_t len, DnieRecord* out) {
     uint8_t version = in[i++];
     if(version == 1) {
         out->kind = DnieRecordFull;
-    } else if(version == 2 || version == 3) {
+    } else if(version >= 2 && version <= 4) {
         out->kind = in[i++];
         if(out->kind != DnieRecordFull && out->kind != DnieRecordAlbum) return false;
     } else {
         return false;
     }
     if(i + 4 > body) return false;
-    out->saved_at = (uint32_t)in[i] << 24 | (uint32_t)in[i + 1] << 16 |
-                    (uint32_t)in[i + 2] << 8 | in[i + 3];
+    out->saved_at = (uint32_t)in[i] << 24 | (uint32_t)in[i + 1] << 16 | (uint32_t)in[i + 2] << 8 |
+                    in[i + 3];
     i += 4;
 
     if(out->kind == DnieRecordFull) {
@@ -129,6 +134,14 @@ bool dnie_record_unpack(const uint8_t* in, size_t len, DnieRecord* out) {
             out->issuer[3] = '\0';
             i += 3;
         }
+    }
+
+    if(version >= 4) {
+        if(i + 1 > body) return false;
+        size_t al = in[i++];
+        if(al >= DNIE_RECORD_ALIAS_MAX || i + al > body) return false;
+        memcpy(out->alias, &in[i], al);
+        i += al;
     }
 
     if(i + 2 > body) return false;

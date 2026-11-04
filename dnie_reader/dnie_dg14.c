@@ -4,9 +4,9 @@
 
 // bsi-de protocols: 0.4.0.127.0.7.2.2.x
 static const uint8_t BSI_PROTO[] = {0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02};
-#define BSI_PK 1
-#define BSI_TA 2
-#define BSI_CA 3
+#define BSI_PK   1
+#define BSI_TA   2
+#define BSI_CA   3
 #define BSI_PACE 4
 // Active Authentication: 2.23.136.1.1.5
 static const uint8_t OID_AA[] = {0x67, 0x81, 0x08, 0x01, 0x01, 0x05};
@@ -30,7 +30,8 @@ static int bsi_proto(const DerTlv* oid, uint8_t* a, uint8_t* b) {
 static DnieCurve explicit_curve(const DerTlv* params) {
     DerIt it = der_enter(params);
     DerTlv version, field;
-    if(!der_expect(&it, 0x02, &version) || !der_expect(&it, 0x30, &field)) return DnieCurveExplicit;
+    if(!der_expect(&it, 0x02, &version) || !der_expect(&it, 0x30, &field))
+        return DnieCurveExplicit;
     DerIt f = der_enter(&field);
     DerTlv ftype, prime;
     if(!der_expect(&f, 0x06, &ftype) || !der_expect(&f, 0x02, &prime)) return DnieCurveExplicit;
@@ -103,8 +104,7 @@ bool dnie_dg14_parse(const uint8_t* data, size_t len, DnieDg14* out) {
             ci->cipher = b;
             if(has_f1) der_uint(&f1, &ci->version);
             if(has_f2 && der_uint(&f2, &ci->key_id)) ci->has_key_id = true;
-        } else if(proto == BSI_PK && out->key_count < DNIE_DG14_MAX_CA && has_f1 &&
-                  f1.tag == 0x30) {
+        } else if(proto == BSI_PK && out->key_count < DNIE_DG14_MAX_CA && has_f1 && f1.tag == 0x30) {
             DnieCaKey* k = &out->keys[out->key_count++];
             k->ka = a;
             parse_public_key(&f1, k);

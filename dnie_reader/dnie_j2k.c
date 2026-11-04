@@ -8,9 +8,9 @@
 // Parametros del codestream
 // ===========================================================================
 
-#define J2K_MAX_COMPS 4
+#define J2K_MAX_COMPS  4
 #define J2K_MAX_LEVELS 8
-#define J2K_MAX_BANDS (3 * J2K_MAX_LEVELS + 1)
+#define J2K_MAX_BANDS  (3 * J2K_MAX_LEVELS + 1)
 
 typedef struct {
     uint8_t levels; // niveles de descomposicion
@@ -148,7 +148,8 @@ static DnieJ2kResult parse_markers(
             j->mct = s[4];
             CompCod c;
             if((r = parse_spcod(s + 5, sl - 5, s[0] & 1, &c)) != DnieJ2kOk) return r;
-            for(int i = 0; i < J2K_MAX_COMPS; i++) j->cod[i] = c;
+            for(int i = 0; i < J2K_MAX_COMPS; i++)
+                j->cod[i] = c;
             break;
         }
         case 0x53: { // COC
@@ -299,7 +300,8 @@ static uint32_t bio_bit(Bio* b) {
 
 static uint32_t bio_read(Bio* b, int n) {
     uint32_t v = 0;
-    for(int i = n - 1; i >= 0; i--) v |= bio_bit(b) << i;
+    for(int i = n - 1; i >= 0; i--)
+        v |= bio_bit(b) << i;
     return v;
 }
 
@@ -392,11 +394,12 @@ static bool tgt_decode(Bio* b, Tgt* t, uint32_t leaf, int32_t threshold) {
 // Decodificador aritmetico MQ (anexo C)
 // ===========================================================================
 
-static const uint16_t MQ_QE[47] = {
-    0x5601, 0x3401, 0x1801, 0x0AC1, 0x0521, 0x0221, 0x5601, 0x5401, 0x4801, 0x3801, 0x3001, 0x2401,
-    0x1C01, 0x1601, 0x5601, 0x5401, 0x5101, 0x4801, 0x3801, 0x3401, 0x3001, 0x2801, 0x2401, 0x2201,
-    0x1C01, 0x1801, 0x1601, 0x1401, 0x1201, 0x1101, 0x0AC1, 0x09C1, 0x08A1, 0x0521, 0x0441, 0x02A1,
-    0x0221, 0x0141, 0x0111, 0x0085, 0x0049, 0x0025, 0x0015, 0x0009, 0x0005, 0x0001, 0x5601};
+static const uint16_t MQ_QE[47] = {0x5601, 0x3401, 0x1801, 0x0AC1, 0x0521, 0x0221, 0x5601, 0x5401,
+                                   0x4801, 0x3801, 0x3001, 0x2401, 0x1C01, 0x1601, 0x5601, 0x5401,
+                                   0x5101, 0x4801, 0x3801, 0x3401, 0x3001, 0x2801, 0x2401, 0x2201,
+                                   0x1C01, 0x1801, 0x1601, 0x1401, 0x1201, 0x1101, 0x0AC1, 0x09C1,
+                                   0x08A1, 0x0521, 0x0441, 0x02A1, 0x0221, 0x0141, 0x0111, 0x0085,
+                                   0x0049, 0x0025, 0x0015, 0x0009, 0x0005, 0x0001, 0x5601};
 static const uint8_t MQ_NMPS[47] = {1,  2,  3,  4,  5,  38, 7,  8,  9,  10, 11, 12, 13, 29, 15, 16,
                                     17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
                                     33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 45, 46};
@@ -407,10 +410,10 @@ static const uint8_t MQ_SWITCH[47] = {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 
                                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-#define CTX_ZC 0 // 0..8
-#define CTX_SC 9 // 9..13
-#define CTX_MR 14 // 14..16
-#define CTX_RL 17
+#define CTX_ZC  0 // 0..8
+#define CTX_SC  9 // 9..13
+#define CTX_MR  14 // 14..16
+#define CTX_RL  17
 #define CTX_UNI 18
 #define NUM_CTX 19
 
@@ -516,9 +519,9 @@ static int mq_decode(Mq* m, int cx) {
 // Tier-1: decodificacion de un code-block por planos de bits (EBCOT, anexo D)
 // ===========================================================================
 
-#define F_SIG 0x01
-#define F_NEG 0x02
-#define F_VISIT 0x04
+#define F_SIG     0x01
+#define F_NEG     0x02
+#define F_VISIT   0x04
 #define F_REFINED 0x08
 
 typedef struct {
@@ -645,8 +648,10 @@ static void cln_pass(T1* t, int bpno) {
                 // Modo "run-length": las 4 muestras sin significar, sin visitar y sin vecinos
                 bool agg = true;
                 for(int y = y0; y < y0 + 4 && agg; y++) {
-                    if(T1F(t, x, y) & (F_SIG | F_VISIT)) agg = false;
-                    else if(zc_context(t, x, y) != 0) agg = false;
+                    if(T1F(t, x, y) & (F_SIG | F_VISIT))
+                        agg = false;
+                    else if(zc_context(t, x, y) != 0)
+                        agg = false;
                 }
                 if(agg) {
                     if(!mq_decode(&t->mq, CTX_RL)) continue; // las 4 siguen a cero
@@ -666,7 +671,8 @@ static void cln_pass(T1* t, int bpno) {
     }
     // Fin del plano: se borran las marcas de visita
     for(int y = 0; y < t->h; y++) {
-        for(int x = 0; x < t->w; x++) T1F(t, x, y) &= (uint8_t)~F_VISIT;
+        for(int x = 0; x < t->w; x++)
+            T1F(t, x, y) &= (uint8_t)~F_VISIT;
     }
 }
 
@@ -739,17 +745,14 @@ static int band_orient(int r, int b) {
 
 static uint32_t floorlog2(uint32_t v) {
     uint32_t l = 0;
-    while(v >>= 1) l++;
+    while(v >>= 1)
+        l++;
     return l;
 }
 
 // Lee un paquete (capa 0) de (componente c, resolucion r). Si store != NULL guarda los code-blocks.
-static DnieJ2kResult read_packet(
-    const J2kParams* j,
-    int c,
-    int r,
-    const uint8_t** pp,
-    LumaCbs* store) {
+static DnieJ2kResult
+    read_packet(const J2kParams* j, int c, int r, const uint8_t** pp, LumaCbs* store) {
     const CompCod* cod = &j->cod[c];
     const uint8_t* p = *pp;
     const uint8_t* end = j->tile_end;
@@ -769,7 +772,8 @@ static DnieJ2kResult read_packet(
 
     // Longitudes y pases de cada code-block (temporales si no los guardamos)
     uint32_t total_cbs = 0;
-    for(int b = 0; b < 3; b++) total_cbs += ncb_x[b] * ncb_y[b];
+    for(int b = 0; b < 3; b++)
+        total_cbs += ncb_x[b] * ncb_y[b];
     CbInfo* tmp = NULL;
     if(!store && total_cbs) {
         tmp = calloc(total_cbs, sizeof(CbInfo));
@@ -799,7 +803,8 @@ static DnieJ2kResult read_packet(
             cb->included = tgt_decode(&bio, &incl, k, 1); // capa 0: incluido si valor < 1
             if(!cb->included) continue;
             uint32_t i = 1;
-            while(!tgt_decode(&bio, &imsb, k, (int32_t)i) && i < 64) i++;
+            while(!tgt_decode(&bio, &imsb, k, (int32_t)i) && i < 64)
+                i++;
             cb->zbp = (uint8_t)(i - 1);
             // Numero de pases
             uint32_t np;
@@ -817,7 +822,8 @@ static DnieJ2kResult read_packet(
             cb->passes = (uint16_t)np;
             // Lblock (empieza en 3) + codigo "coma"
             uint32_t lblock = 3;
-            while(bio_bit(&bio)) lblock++;
+            while(bio_bit(&bio))
+                lblock++;
             uint32_t bits = lblock + floorlog2(np);
             if(bits > 31) {
                 res = DnieJ2kErrorFormat;
@@ -859,9 +865,9 @@ static DnieJ2kResult read_packet(
 // Wavelet inversa (anexo F), con extension simetrica
 // ===========================================================================
 
-#define K97 1.230174104914001f
+#define K97     1.230174104914001f
 #define ALPHA97 -1.586134342059924f
-#define BETA97 -0.052980118572961f
+#define BETA97  -0.052980118572961f
 #define GAMMA97 0.882911075530934f
 #define DELTA97 0.443506852043971f
 
@@ -877,8 +883,10 @@ static int mirror(int i, int n) {
 // line: [L0..Lsn-1 H0..Hdn-1] -> muestras reconstruidas (n = sn + dn), origen par
 static void idwt_1d(float* line, float* tmp, int n, int sn, bool rev) {
     if(n == 1) return; // una sola muestra: se deja tal cual
-    for(int i = 0; i < sn; i++) tmp[2 * i] = line[i];
-    for(int i = 0; i < n - sn; i++) tmp[2 * i + 1] = line[sn + i];
+    for(int i = 0; i < sn; i++)
+        tmp[2 * i] = line[i];
+    for(int i = 0; i < n - sn; i++)
+        tmp[2 * i + 1] = line[sn + i];
 
     if(rev) {
         // 5/3 reversible
@@ -888,8 +896,10 @@ static void idwt_1d(float* line, float* tmp, int n, int sn, bool rev) {
             tmp[i] += (float)(int)((tmp[mirror(i - 1, n)] + tmp[mirror(i + 1, n)]) / 2);
     } else {
         // 9/7 irreversible: escalado (la paso alta lleva un 2/K, como OpenJPEG) y 4 pasos de lifting
-        for(int i = 0; i < n; i += 2) tmp[i] *= K97;
-        for(int i = 1; i < n; i += 2) tmp[i] *= 2.0f / K97;
+        for(int i = 0; i < n; i += 2)
+            tmp[i] *= K97;
+        for(int i = 1; i < n; i += 2)
+            tmp[i] *= 2.0f / K97;
         for(int i = 0; i < n; i += 2)
             tmp[i] -= DELTA97 * (tmp[mirror(i - 1, n)] + tmp[mirror(i + 1, n)]);
         for(int i = 1; i < n; i += 2)
@@ -972,7 +982,8 @@ DnieJ2kResult
     for(int c = 0; c < j.comps; c++)
         if(j.cod[c].levels > max_levels) max_levels = j.cod[c].levels;
     bool done = false;
-    for(int outer = 0; outer <= (res_major ? max_levels : j.comps - 1) && !done && res == DnieJ2kOk;
+    for(int outer = 0;
+        outer <= (res_major ? max_levels : j.comps - 1) && !done && res == DnieJ2kOk;
         outer++) {
         for(int inner = 0; inner <= (res_major ? j.comps - 1 : max_levels) && res == DnieJ2kOk;
             inner++) {
@@ -1085,9 +1096,11 @@ DnieJ2kResult
                     idwt_1d(&img[y * out_w], tmp, (int)rw, (int)lw, rev);
                 }
                 for(uint32_t x = 0; x < rw; x++) {
-                    for(uint32_t y = 0; y < rh; y++) line[y] = img[y * out_w + x];
+                    for(uint32_t y = 0; y < rh; y++)
+                        line[y] = img[y * out_w + x];
                     idwt_1d(line, tmp, (int)rh, (int)lh, rev);
-                    for(uint32_t y = 0; y < rh; y++) img[y * out_w + x] = line[y];
+                    for(uint32_t y = 0; y < rh; y++)
+                        img[y * out_w + x] = line[y];
                 }
             }
         }
@@ -1105,7 +1118,8 @@ DnieJ2kResult
             float scale = j.prec0 > 8 ? 1.0f / (float)(1u << (j.prec0 - 8)) : 1.0f;
             for(uint32_t i = 0; i < out_w * out_h; i++) {
                 float v = (img[i] + dc) * scale + 0.5f;
-                px[i] = (uint8_t)(v < 0 ? 0 : (v > 255 ? 255 : v)); // i <= 4*i: no pisa lo pendiente
+                px[i] =
+                    (uint8_t)(v < 0 ? 0 : (v > 255 ? 255 : v)); // i <= 4*i: no pisa lo pendiente
             }
             void* shrunk = realloc(img, (size_t)out_w * out_h);
             // Si realloc falla, el bloque original (con los pixeles ya escritos) sigue valido

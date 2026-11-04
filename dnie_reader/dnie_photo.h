@@ -10,8 +10,8 @@
 #include "dnie_hash.h"
 
 // Ruta explicita: el volcado se hace desde el hilo NFC, asi no dependemos del alias /data
-#define DNIE_DATA_DIR EXT_PATH("apps_data/dnie_reader")
-#define DNIE_DG2_PATH DNIE_DATA_DIR "/dg2.bin"
+#define DNIE_DATA_DIR       EXT_PATH("apps_data/dnie_reader")
+#define DNIE_DG2_PATH       DNIE_DATA_DIR "/dg2.bin"
 #define DNIE_PHOTO_J2K_PATH DNIE_DATA_DIR "/foto.jp2"
 #define DNIE_PHOTO_JPG_PATH DNIE_DATA_DIR "/foto.jpg"
 

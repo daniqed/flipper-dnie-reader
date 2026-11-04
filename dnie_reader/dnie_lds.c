@@ -2,9 +2,10 @@
 
 #include <string.h>
 
-#define TAG "DnieLds"
+#define TAG   "DnieLds"
 #define SW_OK 0x9000
-#define LDS_READ_CHUNK 0x60 // 96 B en claro -> ~131 B protegidos, como las lecturas que ya funcionan
+#define LDS_READ_CHUNK \
+    0x60 // 96 B en claro -> ~131 B protegidos, como las lecturas que ya funcionan
 #define LDS_BUF 300
 
 typedef struct {

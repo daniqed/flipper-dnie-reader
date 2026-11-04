@@ -31,7 +31,8 @@ static bool check_field(const char* field, size_t len, char check_char) {
 
 // Copia un campo quitando el relleno '<' del final
 static void copy_trim(char* dst, size_t dst_size, const char* src, size_t len) {
-    while(len > 0 && src[len - 1] == '<') len--;
+    while(len > 0 && src[len - 1] == '<')
+        len--;
     if(len >= dst_size) len = dst_size - 1;
     memcpy(dst, src, len);
     dst[len] = '\0';
@@ -80,7 +81,8 @@ static void parse_name(const char* f, size_t n, DnieMrz* out) {
     }
     if(sep) {
         copy_trim(out->surnames, sizeof(out->surnames), f, (size_t)(sep - f));
-        copy_trim(out->given_names, sizeof(out->given_names), sep + 2, (size_t)(f + n - (sep + 2)));
+        copy_trim(
+            out->given_names, sizeof(out->given_names), sep + 2, (size_t)(f + n - (sep + 2)));
     } else {
         copy_trim(out->surnames, sizeof(out->surnames), f, n);
     }

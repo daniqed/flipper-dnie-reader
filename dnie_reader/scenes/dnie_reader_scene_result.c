@@ -50,10 +50,15 @@ static void cat_auth(DnieApp* app, FuriString* text) {
         } else if(a->ca.result == DnieCaFailed) {
             furi_string_cat_str(text, "!! CHIP AUTH FAILED !!\n");
         } else if(dnie_auth_all_ok(a)) {
-            furi_string_cat_str(text, "GENUINE DOCUMENT\n(hashes + sig. +\nCSCA SPAIN + chip)\n");
+            furi_string_cat_str(
+                text,
+                app->demo ?
+                    "DEMO: what a genuine\ndocument shows\n(hashes + sig. +\nCSCA SPAIN + chip)\n" :
+                    "GENUINE DOCUMENT\n(hashes + sig. +\nCSCA SPAIN + chip)\n");
         } else if(dnie_auth_data_ok(a)) {
             furi_string_cat_str(
-                text, "AUTHENTIC DATA\n(hashes + sig. +\nCSCA; chip doesn't\nsupport Chip Auth)\n");
+                text,
+                "AUTHENTIC DATA\n(hashes + sig. +\nCSCA; chip doesn't\nsupport Chip Auth)\n");
         } else if(dnie_auth_integrity_ok(a)) {
             furi_string_cat_str(text, "SOD hashes: OK\n");
         }
@@ -77,7 +82,8 @@ static void cat_auth(DnieApp* app, FuriString* text) {
         if(a->pa.key_bits) furi_string_cat_printf(text, " %u bits", a->pa.key_bits);
         furi_string_cat_printf(text, ", %s\n", dnie_hash_name(a->pa.hash));
         if(a->has_cert) {
-            furi_string_cat_printf(text, "DS: %s\nIssuer: %s\n", a->ds_subject_cn, a->ds_issuer_cn);
+            furi_string_cat_printf(
+                text, "DS: %s\nIssuer: %s\n", a->ds_subject_cn, a->ds_issuer_cn);
             furi_string_cat_printf(text, "CSCA chain: %s\n", dnie_csca_result_str(a->csca.result));
             if(a->csca.csca_name[0]) furi_string_cat_printf(text, "(%s)\n", a->csca.csca_name);
         }
@@ -254,7 +260,7 @@ void dnie_scene_result_on_enter(void* context) {
         datetime_timestamp_to_datetime(app->saved_at, &saved);
         furi_string_printf(
             text,
-            "\e#%s\n%s\n%s\nBirthday: %c%c/%c%c/%.4s\n\n\e#Album\nOnly the name,\nphoto and birthday\nwere saved.\nNo document\nnumbers.\n\nSaved %02u/%02u/%u\nEncrypted with this\nFlipper's unique key\n\n\e#Card controls\n<- -> photo style\nHold down:\ndelete\n",
+            "\e#%s\n%s\n%s\nBirthday: %c%c/%c%c/%.4s\n\n\e#Album\nOnly the name,\nphoto and birthday\nwere saved.\nNo document\nnumbers.\n\nSaved %02u/%02u/%u\nEncrypted with this\nFlipper's unique key\n\n\e#Card controls\n<- -> photo style\nHold OK: rename\nHold down:\ndelete\n",
             app->album_given,
             app->album_surnames,
             dnie_country_name(app->album_issuer),
@@ -271,7 +277,8 @@ void dnie_scene_result_on_enter(void* context) {
         DateTime saved;
         datetime_timestamp_to_datetime(app->saved_at, &saved);
         furi_string_printf(text, "\e#%s\n%s\n", m->given_names, m->surnames);
-        furi_string_cat_printf(text, "ID: %s\nSupport: %s\nBorn: ", m->personal_number, m->doc_number);
+        furi_string_cat_printf(
+            text, "ID: %s\nSupport: %s\nBorn: ", m->personal_number, m->doc_number);
         cat_date(text, m->birth, true, now.year);
         furi_string_cat_str(text, "\nExpires: ");
         cat_date(text, m->expiry, false, now.year);
@@ -287,7 +294,8 @@ void dnie_scene_result_on_enter(void* context) {
             saved.hour,
             saved.minute);
         furi_string_cat_str(
-            text, "\n\e#Card controls\n<- -> photo style\nHold down:\ndelete reading\n");
+            text,
+            "\n\e#Card controls\n<- -> photo style\nHold OK: rename\nHold down:\ndelete reading\n");
     } else if(app->read_result != DnieCardOk) {
         furi_string_printf(
             text,
@@ -329,7 +337,10 @@ void dnie_scene_result_on_enter(void* context) {
         if(app->lds.result == DnieLdsErrorSm) {
             furi_string_cat_printf(text, "SM: %s\n", dnie_sm_result_str(app->lds.sm_result));
         }
-        furi_string_cat_str(text, app->passport ? "(access OK: the data\nis correct)\n" : "(PACE OK: the CAN\nis correct)\n");
+        furi_string_cat_str(
+            text,
+            app->passport ? "(access OK: the data\nis correct)\n" :
+                            "(PACE OK: the CAN\nis correct)\n");
         cat_technical(app, text);
 
     } else if(!app->mrz_ok) {
@@ -341,6 +352,9 @@ void dnie_scene_result_on_enter(void* context) {
     } else {
         const DnieMrz* m = &app->mrz;
         furi_string_printf(text, "\e#%s\n%s\n", m->given_names, m->surnames);
+        if(app->demo) {
+            furi_string_cat_str(text, "\n\e#DEMO\nSample data, not a\nreal reading.\n");
+        }
         furi_string_cat_printf(text, "ID: %s\n", m->personal_number);
         furi_string_cat_printf(text, "Support: %s\n", m->doc_number);
         furi_string_cat_str(text, "Born: ");
@@ -349,10 +363,7 @@ void dnie_scene_result_on_enter(void* context) {
         cat_date(text, m->expiry, false, now.year);
         if(is_expired(m->expiry, &now)) furi_string_cat_str(text, " (EXPIRED)");
         furi_string_cat_printf(text, "\nSex: %c   Nat.: %s\n", m->sex, m->nationality);
-        furi_string_cat_printf(
-            text,
-            "MRZ check: %s\n",
-            dnie_mrz_all_checks_ok(m) ? "OK" : "FAIL");
+        furi_string_cat_printf(text, "MRZ check: %s\n", dnie_mrz_all_checks_ok(m) ? "OK" : "FAIL");
         furi_string_cat_str(text, "Read via secure\nchannel (PACE+SM)\n");
         furi_string_cat_str(
             text,
