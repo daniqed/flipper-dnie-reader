@@ -22,3 +22,10 @@ void dnie_sound_fake(NotificationApp* n);
 
 // Corta la musica al instante (al salir de la app o empezar otra lectura)
 void dnie_sound_stop(void);
+
+// Volumen del himno: 0 = apagado, 1..4 = 25/50/75/100 %. Se guarda en la SD.
+uint8_t dnie_sound_volume(void);
+void dnie_sound_volume_set(uint8_t level);
+void dnie_sound_volume_load(void);
+// Fanfarria corta para probar el volumen
+void dnie_sound_preview(void);

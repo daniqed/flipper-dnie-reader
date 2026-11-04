@@ -128,14 +128,14 @@ const char* dnie_bac_result_str(DnieBacResult r) {
     case DnieBacOk:
         return "OK";
     case DnieBacErrorTransport:
-        return "Fallo de radio";
+        return "Radio failure";
     case DnieBacErrorChallenge:
-        return "GET CHALLENGE\nrechazado";
+        return "GET CHALLENGE\nrejected";
     case DnieBacErrorAuth:
-        return "Datos de la MRZ\nincorrectos";
+        return "MRZ data\nincorrect";
     case DnieBacErrorChip:
-        return "Respuesta del chip\nno valida";
+        return "Chip response\ninvalid";
     default:
-        return "Error de cripto";
+        return "Crypto error";
     }
 }

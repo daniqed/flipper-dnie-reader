@@ -1,5 +1,6 @@
 #include "../dnie_reader.h"
 #include "dnie_reader_scene.h"
+#include "../dnie_sounds.h"
 
 #define SAVED_EMPTY_INDEX 0xFFFF
 
@@ -10,9 +11,10 @@ static void dnie_scene_saved_list_callback(void* context, uint32_t index) {
 
 void dnie_scene_saved_list_on_enter(void* context) {
     DnieApp* app = context;
+    dnie_sound_stop(); // por si venimos de un carnet con el himno sonando
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
-    submenu_set_header(submenu, "Lecturas guardadas");
+    submenu_set_header(submenu, "Saved readings");
 
     // La lista solo ocupa memoria mientras se ve (unos 4 KB)
     if(!app->saved_entries) app->saved_entries = malloc(sizeof(DnieSavedEntry) * DNIE_STORE_MAX);
@@ -24,7 +26,7 @@ void dnie_scene_saved_list_on_enter(void* context) {
     }
     if(app->saved_count == 0) {
         submenu_add_item(
-            submenu, "(ninguna todavia)", SAVED_EMPTY_INDEX, dnie_scene_saved_list_callback, app);
+            submenu, "(none yet)", SAVED_EMPTY_INDEX, dnie_scene_saved_list_callback, app);
     }
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, DnieSceneSavedList));
@@ -47,6 +49,7 @@ static bool load_saved(DnieApp* app, size_t index) {
             strlcpy(app->album_given, rec->given_names, sizeof(app->album_given));
             strlcpy(app->album_surnames, rec->surnames, sizeof(app->album_surnames));
             memcpy(app->album_birth, rec->birth, sizeof(app->album_birth));
+            strlcpy(app->album_issuer, rec->issuer, sizeof(app->album_issuer));
         } else {
             memcpy(app->dg1, rec->dg1, rec->dg1_len);
             app->dg1_len = rec->dg1_len;
@@ -83,6 +86,9 @@ bool dnie_scene_saved_list_on_event(void* context, SceneManagerEvent event) {
         if(event.event < app->saved_count) {
             scene_manager_set_scene_state(app->scene_manager, DnieSceneSavedList, event.event);
             if(load_saved(app, event.event)) {
+                // El himno de su pais al abrirla
+                const char* issuer = app->viewing_album ? app->album_issuer : app->mrz.issuer;
+                if(issuer[0]) dnie_sound_original(app->notifications, issuer);
                 scene_manager_next_scene(app->scene_manager, DnieSceneCard);
             } else {
                 notification_message(app->notifications, &sequence_error);

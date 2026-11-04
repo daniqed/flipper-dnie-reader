@@ -57,7 +57,7 @@ static void input_draw(Canvas* canvas, void* model) {
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 44, AlignCenter, AlignTop, m->hint);
-    canvas_draw_str_aligned(canvas, 64, 54, AlignCenter, AlignTop, "Arriba/abajo cambia, OK");
+    canvas_draw_str_aligned(canvas, 64, 54, AlignCenter, AlignTop, "Up/down: change, OK");
 }
 
 static bool input_input(InputEvent* event, void* context) {
@@ -143,16 +143,16 @@ static void fill_model(DnieApp* app, InputModel* m) {
     switch(app->input_field) {
     case DnieInputCan:
         m->len = DNIE_CAN_LENGTH;
-        m->title = app->foreign_id ? "CAN del documento" : "CAN del DNI";
-        m->hint = app->foreign_id ? "6 cifras impresas" : "6 cifras del anverso";
+        m->title = app->foreign_id ? "Document CAN" : "ID CAN";
+        m->hint = app->foreign_id ? "6 printed digits" : "6 digits on front";
         for(int i = 0; i < m->len; i++)
             m->chars[i] = strlen(app->can) == DNIE_CAN_LENGTH ? app->can[i] : '0';
         break;
     case DnieInputPassNumber: {
         m->len = 9;
         m->alnum = true;
-        m->title = app->foreign_id ? "N. de documento" : "N. de pasaporte";
-        m->hint = app->foreign_id ? "El de la MRZ" : "Ej: PAA123456";
+        m->title = app->foreign_id ? "Document No." : "Passport No.";
+        m->hint = app->foreign_id ? "As in the MRZ" : "E.g.: PAA123456";
         size_t n = strlen(app->pass_number);
         for(int i = 0; i < m->len; i++) m->chars[i] = i < (int)n ? app->pass_number[i] : '<';
         if(n == 0) memcpy(m->chars, "PAA000000", 9);
@@ -162,7 +162,7 @@ static void fill_model(DnieApp* app, InputModel* m) {
         bool birth = app->input_field == DnieInputPassBirth;
         const char* src = birth ? app->pass_birth : app->pass_expiry;
         m->len = 6;
-        m->title = birth ? "Nacimiento" : "Caducidad";
+        m->title = birth ? "Birth date" : "Expiry";
         m->hint = "DD MM AA";
         if(strlen(src) == 6) {
             // AAMMDD guardado -> DDMMAA en pantalla

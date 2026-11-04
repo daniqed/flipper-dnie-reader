@@ -1,5 +1,6 @@
 #include "../dnie_reader.h"
 #include "../dnie_jpeg.h"
+#include "../dnie_sounds.h"
 #include "dnie_reader_scene.h"
 
 #include <furi_hal_rtc.h>
@@ -164,7 +165,7 @@ static void card_decode_photo_inner(DnieApp* app) {
 // Fechas
 // ---------------------------------------------------------------------------
 
-// "AAAAMMDD" -> "DD/MM/AAAA"
+// "AAAAMMDD" -> "DD/MM/YYYY"
 static void format_full_date(char* out, size_t size, const char* yyyymmdd) {
     snprintf(
         out,
@@ -248,9 +249,9 @@ static void card_draw(Canvas* canvas, void* model) {
         canvas_draw_frame(canvas, 0, 0, pw, 64);
         canvas_set_font(canvas, FontSecondary);
         bool no_mem = app->photo_decode_result == DnieJ2kErrorMemory;
-        canvas_draw_str_aligned(canvas, pw / 2, 28, AlignCenter, AlignCenter, "Sin");
+        canvas_draw_str_aligned(canvas, pw / 2, 28, AlignCenter, AlignCenter, "No");
         canvas_draw_str_aligned(
-            canvas, pw / 2, 38, AlignCenter, AlignCenter, no_mem ? "memoria" : "foto");
+            canvas, pw / 2, 38, AlignCenter, AlignCenter, no_mem ? "memory" : "photo");
     }
     canvas_draw_line(canvas, pw + 1, 0, pw + 1, 63);
 
@@ -260,14 +261,15 @@ static void card_draw(Canvas* canvas, void* model) {
     if(app->viewing_album) {
         // Album: nombre, cumpleanos y cuenta atras
         draw_names(canvas, x, w, app->album_given, app->album_surnames);
-        draw_fit(canvas, x, 40, "Cumple:", w);
+        draw_fit(
+            canvas, x, 40, app->album_issuer[0] ? dnie_country_name(app->album_issuer) : "Birthday:", w);
         format_full_date(line, sizeof(line), app->album_birth);
         draw_fit(canvas, x, 50, line, w);
         int days = days_to_birthday(app->album_birth);
         if(days == 0) {
-            snprintf(line, sizeof(line), "Es HOY!");
+            snprintf(line, sizeof(line), "TODAY!");
         } else if(days > 0) {
-            snprintf(line, sizeof(line), "Faltan %d dias", days);
+            snprintf(line, sizeof(line), "%d days to go", days);
         } else {
             line[0] = '\0';
         }
@@ -280,7 +282,7 @@ static void card_draw(Canvas* canvas, void* model) {
         dnie_birth_full(m->birth, full);
         format_full_date(line, sizeof(line), full);
         draw_fit(canvas, x, 50, line, w);
-        snprintf(line, sizeof(line), "%s  %c", m->nationality, m->sex);
+        snprintf(line, sizeof(line), "%s  %c", dnie_country_name(m->issuer), m->sex);
         draw_fit(canvas, x, 60, line, w);
 
         // Indicador de integridad (solo en lecturas nuevas: las guardadas no conservan el SOD)
@@ -289,12 +291,12 @@ static void card_draw(Canvas* canvas, void* model) {
                        app->auth.ca.result == DnieCaFailed ||
                        app->auth.pa.result == DniePaBadSignature ||
                        app->auth.csca.result == DnieCscaBadSignature;
-            const char* badge = dnie_auth_integrity_failed(&app->auth)  ? "ALTER" :
-                                app->auth.pa.result == DniePaBadSignature ? "FIRMA!" :
+            const char* badge = dnie_auth_integrity_failed(&app->auth)  ? "TAMPER" :
+                                app->auth.pa.result == DniePaBadSignature ? "SIG!" :
                                 app->auth.csca.result == DnieCscaBadSignature ? "CSCA!" :
-                                app->auth.ca.result == DnieCaFailed      ? "CA FALLA" :
-                                dnie_auth_all_ok(&app->auth)              ? "ORIGINAL" :
-                                dnie_auth_data_ok(&app->auth)             ? "DATOS OK" :
+                                app->auth.ca.result == DnieCaFailed      ? "CA FAIL" :
+                                dnie_auth_all_ok(&app->auth)              ? "GENUINE" :
+                                dnie_auth_data_ok(&app->auth)             ? "DATA OK" :
                                 dnie_auth_integrity_ok(&app->auth)        ? "SOD OK" :
                                                                             NULL;
             if(badge) {
@@ -370,7 +372,7 @@ static bool card_input(InputEvent* event, void* context) {
 
     if(event->key == InputKeyUp) {
         if(app->viewing_saved) {
-            card_show_toast(app, "Ya guardada", 1500);
+            card_show_toast(app, "Already saved", 1500);
         } else {
             view_dispatcher_send_custom_event(app->view_dispatcher, DnieCustomEventCardSave);
         }
@@ -411,13 +413,15 @@ void dnie_scene_card_on_enter(void* context) {
         app->pending_toast = NULL;
     } else if(app->card_hint_pending) {
         app->card_hint_pending = false;
-        card_show_toast(app, "Arriba: guardar", 2200);
+        card_show_toast(app, "Up: save", 2200);
     }
 }
 
 bool dnie_scene_card_on_event(void* context, SceneManagerEvent event) {
     DnieApp* app = context;
     bool consumed = false;
+    // Al salir del carnet (Atras) se acaba la musica
+    if(event.type == SceneManagerEventTypeBack) dnie_sound_stop();
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DnieCustomEventCardDetails) {
             scene_manager_next_scene(app->scene_manager, DnieSceneResult);

@@ -237,17 +237,17 @@ const char* dnie_sm_result_str(DnieSmResult result) {
     case DnieSmOk:
         return "OK";
     case DnieSmErrorMac:
-        return "MAC de respuesta\nincorrecto";
+        return "Response MAC\nincorrect";
     case DnieSmErrorFormat:
-        return "Respuesta SM\nmal formada";
+        return "SM response\nmalformed";
     case DnieSmErrorPadding:
-        return "Relleno SM\nincorrecto";
+        return "SM padding\nincorrect";
     case DnieSmErrorPlainStatus:
-        return "El chip rechazo\nel comando SM";
+        return "Chip rejected\nthe SM command";
     case DnieSmErrorBuffer:
-        return "Respuesta SM\ndemasiado grande";
+        return "SM response\ntoo large";
     case DnieSmErrorCrypto:
-        return "Error de cripto SM";
+        return "SM crypto error";
     }
-    return "Error SM desconocido";
+    return "Unknown SM error";
 }

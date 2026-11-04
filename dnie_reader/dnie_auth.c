@@ -207,12 +207,12 @@ const char* dnie_check_str(DnieCheck c) {
     case DnieCheckOk:
         return "OK";
     case DnieCheckFail:
-        return "NO COINCIDE";
+        return "MISMATCH";
     case DnieCheckMissing:
-        return "no incluido";
+        return "not included";
     case DnieCheckUnsupported:
-        return "alg. no soportado";
+        return "unsupported alg.";
     default:
-        return "no comprobado";
+        return "not checked";
     }
 }

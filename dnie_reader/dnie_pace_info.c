@@ -139,5 +139,5 @@ const char* dnie_pace_param_str(uint32_t param_id) {
     case 18:
         return "NIST P-521";
     }
-    return "desconocida";
+    return "unknown";
 }

@@ -1,4 +1,5 @@
 #include "dnie_store.h"
+#include "dnie_country.h"
 #include "dnie_mrz.h"
 
 #include <furi_hal_crypto.h>
@@ -210,13 +211,16 @@ static bool list_one(const char* path, void* context) {
     DnieMrz mrz;
     bool ok = dnie_store_load(path, l->tmp) == DnieStoreOk;
     const char* given_src = NULL;
+    const char* issuer = "";
     const char* sur_src = NULL;
     if(ok && l->tmp->kind == DnieRecordFull && dnie_mrz_parse_dg1(l->tmp->dg1, l->tmp->dg1_len, &mrz)) {
         given_src = mrz.given_names;
         sur_src = mrz.surnames;
+        issuer = mrz.issuer;
     } else if(ok && l->tmp->kind == DnieRecordAlbum) {
         given_src = l->tmp->given_names;
         sur_src = l->tmp->surnames;
+        issuer = l->tmp->issuer;
     }
     if(given_src) {
         char given[31];
@@ -231,13 +235,15 @@ static bool list_one(const char* path, void* context) {
         snprintf(
             e->label,
             sizeof(e->label),
-            "%s %s%s",
+            "%s %s%s%s%s",
             given,
             surname,
-            l->tmp->kind == DnieRecordFull ? " (DNI)" : "");
+            issuer[0] ? " - " : "",
+            dnie_country_name(issuer),
+            l->tmp->kind == DnieRecordFull ? " (ID)" : "");
         memset(&mrz, 0, sizeof(mrz));
     } else {
-        strlcpy(e->label, "(ilegible)", sizeof(e->label)); // corrupto o de otro Flipper
+        strlcpy(e->label, "(unreadable)", sizeof(e->label)); // corrupto o de otro Flipper
     }
     memset(l->tmp, 0, sizeof(DnieRecord));
     l->n++;

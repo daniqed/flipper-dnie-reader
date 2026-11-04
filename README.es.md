@@ -18,6 +18,7 @@ App para [Flipper Zero](https://flipperzero.one) que lee por NFC el **DNI electr
   - **Chip Authentication** (detecta chips clonados).
 - **Pasaportes y DNI de otros países**: PACE o BAC con la MRZ, chips 4A y 4B, foto JPEG o JPEG2000.
 - **Cadena CSCA de 20 países** (RSA y RSA-PSS) y **himno del país** cuando el documento es auténtico.
+- **Interfaz en inglés.** Al abrir una lectura guardada suena el himno de su país.
 - **Lecturas guardadas**, cifradas con la clave única del enclave del Flipper. Dos modos: DNI completo, o solo nombre, foto y cumpleaños.
 
 ## Instalar

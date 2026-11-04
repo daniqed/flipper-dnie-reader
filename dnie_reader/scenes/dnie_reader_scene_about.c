@@ -7,7 +7,7 @@ void dnie_scene_about_on_enter(void* context) {
 
     widget_reset(widget);
     widget_add_string_element(
-        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "IDentity v0.19");
+        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, "IDentity v0.21");
     widget_add_string_multiline_element(
         widget,
         64,
@@ -15,7 +15,7 @@ void dnie_scene_about_on_enter(void* context) {
         AlignCenter,
         AlignTop,
         FontSecondary,
-        "DNI, pasaportes y eID\nPACE, BAC, foto, CSCA\nSolo tus documentos");
+        "ID, passports & eID\nPACE, BAC, photo, CSCA\nOnly your own docs");
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DnieViewWidget);
 }

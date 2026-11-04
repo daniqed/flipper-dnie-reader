@@ -380,29 +380,29 @@ const char* dnie_pace_result_str(DniePaceResult result) {
     case DniePaceOk:
         return "OK";
     case DniePaceErrorUnsupported:
-        return "Variante PACE\nno soportada";
+        return "PACE variant\nnot supported";
     case DniePaceErrorTransport:
-        return "Error de radio\n(no muevas el DNI)";
+        return "Radio error\n(don't move the ID)";
     case DniePaceErrorMse:
-        return "El chip rechazo\nMSE:Set AT";
+        return "Chip rejected\nMSE:Set AT";
     case DniePaceErrorNonce:
-        return "El chip rechazo\nel paso 1 (nonce)";
+        return "Chip rejected\nstep 1 (nonce)";
     case DniePaceErrorMap:
-        return "El chip rechazo\nel paso 2 (mapeo)";
+        return "Chip rejected\nstep 2 (mapping)";
     case DniePaceErrorKeyAgreement:
-        return "El chip rechazo\nel paso 3 (ECDH)";
+        return "Chip rejected\nstep 3 (ECDH)";
     case DniePaceErrorWrongCan:
-        return "CAN o datos de la\nMRZ incorrectos";
+        return "Wrong CAN or\nMRZ data";
     case DniePaceErrorChipToken:
-        return "El token del chip\nno cuadra";
+        return "Chip token\nmismatch";
     case DniePaceErrorFormat:
-        return "Respuesta con\nformato inesperado";
+        return "Response has\nunexpected format";
     case DniePaceErrorBadPoint:
-        return "Punto de curva\ninvalido";
+        return "Invalid curve\npoint";
     case DniePaceErrorCrypto:
-        return "Error de cripto";
+        return "Crypto error";
     case DniePaceErrorNoMemory:
-        return "Sin memoria para\nla curva eliptica";
+        return "No memory for\nelliptic curve";
     }
-    return "Error desconocido";
+    return "Unknown error";
 }

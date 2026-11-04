@@ -183,22 +183,22 @@ DnieCaResult dnie_ca_run(
 const char* dnie_ca_result_str(DnieCaResult r) {
     switch(r) {
     case DnieCaOk:
-        return "CHIP AUTENTICO";
+        return "GENUINE CHIP";
     case DnieCaNotAvailable:
-        return "no disponible";
+        return "not available";
     case DnieCaUnsupported:
-        return "variante no soportada";
+        return "unsupported variant";
     case DnieCaRejected:
-        return "rechazada por el chip";
+        return "rejected by chip";
     case DnieCaFailed:
-        return "FALLO: posible clon";
+        return "FAIL: possible clone";
     case DnieCaTransport:
-        return "error de radio";
+        return "radio error";
     case DnieCaCrypto:
-        return "error de cripto";
+        return "crypto error";
     case DnieCaNoMemory:
-        return "sin memoria";
+        return "out of memory";
     default:
-        return "no realizada";
+        return "not performed";
     }
 }

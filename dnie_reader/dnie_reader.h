@@ -6,6 +6,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/variable_item_list.h>
 #include <nfc/nfc.h>
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>
@@ -23,6 +24,7 @@
 #include "dnie_store.h"
 #include "dnie_auth.h"
 #include "dnie_bac.h"
+#include "dnie_country.h"
 
 #define DNIE_CAN_LENGTH 6 // El CAN del DNIe son 6 digitos impresos en el anverso
 #define DNIE_CAN_BUFFER_SIZE (DNIE_CAN_LENGTH + 1)
@@ -33,6 +35,7 @@ typedef enum {
     DnieViewWidget,
     DnieViewCard, // carnet con la foto en pixel art
     DnieViewCan, // CAN: 6 casillas numericas
+    DnieViewSettings, // volumen del himno
 } DnieView;
 
 // Eventos personalizados que las escenas se mandan entre si
@@ -62,6 +65,7 @@ typedef struct {
     SceneManager* scene_manager;
 
     Submenu* submenu;
+    VariableItemList* settings;
     View* can_view;
     Widget* widget;
     NotificationApp* notifications; // LED, vibracion y sonido
@@ -134,6 +138,7 @@ typedef struct {
     char album_given[DNIE_RECORD_NAME_MAX];
     char album_surnames[DNIE_RECORD_NAME_MAX];
     char album_birth[9]; // AAAAMMDD
+    char album_issuer[4]; // pais emisor (vacio en albumes antiguos)
 
     uint16_t last_sw;
     uint8_t card_access[DNIE_CARD_ACCESS_MAX];

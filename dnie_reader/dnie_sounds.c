@@ -10,10 +10,10 @@ DnieVerdict dnie_verdict(const DnieAuth* a) {
 }
 
 const char* dnie_verdict_reason(const DnieAuth* a) {
-    if(dnie_auth_integrity_failed(a)) return "Datos alterados:\nlos hashes no cuadran";
-    if(a->pa.result == DniePaBadSignature) return "Firma del SOD\nfalsa";
-    if(a->csca.result == DnieCscaBadSignature) return "Certificado no\nemitido por la Policia";
-    if(a->ca.result == DnieCaFailed) return "El chip no tiene la\nclave: posible CLON";
+    if(dnie_auth_integrity_failed(a)) return "Data tampered:\nhashes don't match";
+    if(a->pa.result == DniePaBadSignature) return "SOD signature\nis fake";
+    if(a->csca.result == DnieCscaBadSignature) return "Certificate not\nissued by Police";
+    if(a->ca.result == DnieCaFailed) return "Chip lacks the\nkey: possible CLONE";
     return NULL;
 }
 
@@ -23,6 +23,7 @@ const char* dnie_verdict_reason(const DnieAuth* a) {
 
 #include <furi_hal_speaker.h>
 #include <furi_hal_rtc.h>
+#include <storage/storage.h>
 #include <string.h>
 
 typedef struct {
@@ -88,12 +89,46 @@ typedef struct {
 
 static Player player;
 
+// Volumen del himno: 0 = apagado ... 4 = 100 %. Se guarda en la SD.
+#define VOLUME_PATH EXT_PATH("apps_data/dnie_reader/volume")
+static uint8_t volume_level = 4;
+static const float VOLUMES[] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
+
+uint8_t dnie_sound_volume(void) {
+    return volume_level;
+}
+
+void dnie_sound_volume_load(void) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* f = storage_file_alloc(storage);
+    uint8_t v;
+    if(storage_file_open(f, VOLUME_PATH, FSAM_READ, FSOM_OPEN_EXISTING) &&
+       storage_file_read(f, &v, 1) == 1 && v <= 4)
+        volume_level = v;
+    storage_file_close(f);
+    storage_file_free(f);
+    furi_record_close(RECORD_STORAGE);
+}
+
+void dnie_sound_volume_set(uint8_t level) {
+    if(level > 4) level = 4;
+    volume_level = level;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_mkdir(storage, EXT_PATH("apps_data"));
+    storage_simply_mkdir(storage, EXT_PATH("apps_data/dnie_reader"));
+    File* f = storage_file_alloc(storage);
+    if(storage_file_open(f, VOLUME_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) storage_file_write(f, &level, 1);
+    storage_file_close(f);
+    storage_file_free(f);
+    furi_record_close(RECORD_STORAGE);
+}
+
 static int32_t player_thread(void* ctx) {
     UNUSED(ctx);
     if(!furi_hal_speaker_acquire(1000)) return 0;
     for(size_t i = 0; i < player.n && !player.stop; i++) {
         const Note* nt = &player.notes[i];
-        if(nt->freq > 0) furi_hal_speaker_start(nt->freq, 1.0f);
+        if(nt->freq > 0) furi_hal_speaker_start(nt->freq, VOLUMES[volume_level]);
         // Esperar en trozos cortos para poder cortar enseguida
         uint32_t left = nt->ms > 30 ? nt->ms - 30 : nt->ms;
         while(left && !player.stop) {
@@ -120,7 +155,7 @@ void dnie_sound_stop(void) {
 static void play(const Note* notes, size_t n) {
     dnie_sound_stop();
     // Modo silencioso del Flipper: sin musica (las luces y la vibracion siguen)
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) return;
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode) || volume_level == 0) return;
     player.notes = notes;
     player.n = n;
     player.stop = false;
@@ -157,6 +192,10 @@ void dnie_sound_original(NotificationApp* n, const char* issuer) {
             return;
         }
     }
+    play(FANFARE, sizeof(FANFARE) / sizeof(FANFARE[0]));
+}
+
+void dnie_sound_preview(void) {
     play(FANFARE, sizeof(FANFARE) / sizeof(FANFARE[0]));
 }
 

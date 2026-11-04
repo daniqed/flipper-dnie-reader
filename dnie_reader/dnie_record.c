@@ -25,7 +25,7 @@ size_t dnie_record_pack(const DnieRecord* rec, uint8_t* out, size_t max) {
         if(rec->dg1_len > DNIE_RECORD_DG1_MAX) return 0;
         payload = 1 + rec->dg1_len;
     } else if(rec->kind == DnieRecordAlbum) {
-        payload = 1 + given_len + 1 + sur_len + 8;
+        payload = 1 + given_len + 1 + sur_len + 8 + 3;
     } else {
         return 0;
     }
@@ -55,6 +55,9 @@ size_t dnie_record_pack(const DnieRecord* rec, uint8_t* out, size_t max) {
         i += sur_len;
         memcpy(&out[i], rec->birth, 8);
         i += 8;
+        memset(&out[i], 0, 3);
+        memcpy(&out[i], rec->issuer, safe_strlen(rec->issuer, 3));
+        i += 3;
     }
     out[i++] = rec->has_photo ? rec->photo.width : 0;
     out[i++] = rec->has_photo ? rec->photo.height : 0;
@@ -91,7 +94,7 @@ bool dnie_record_unpack(const uint8_t* in, size_t len, DnieRecord* out) {
     uint8_t version = in[i++];
     if(version == 1) {
         out->kind = DnieRecordFull;
-    } else if(version == 2) {
+    } else if(version == 2 || version == 3) {
         out->kind = in[i++];
         if(out->kind != DnieRecordFull && out->kind != DnieRecordAlbum) return false;
     } else {
@@ -120,6 +123,12 @@ bool dnie_record_unpack(const uint8_t* in, size_t len, DnieRecord* out) {
         i += sl;
         memcpy(out->birth, &in[i], 8);
         i += 8;
+        if(version >= 3) {
+            if(i + 3 > body) return false;
+            memcpy(out->issuer, &in[i], 3);
+            out->issuer[3] = '\0';
+            i += 3;
+        }
     }
 
     if(i + 2 > body) return false;

@@ -228,21 +228,21 @@ const char* dnie_lds_result_str(DnieLdsResult result) {
     case DnieLdsOk:
         return "OK";
     case DnieLdsErrorTransport:
-        return "Error de radio\n(no muevas el DNI)";
+        return "Radio error\n(don't move the ID)";
     case DnieLdsErrorSm:
-        return "Fallo en el\ncanal seguro (SM)";
+        return "Secure channel\nfailure (SM)";
     case DnieLdsErrorSelectApp:
-        return "El chip rechazo\nla app eMRTD";
+        return "Chip rejected\nthe eMRTD app";
     case DnieLdsErrorSelectFile:
-        return "No encontre\nel fichero";
+        return "File\nnot found";
     case DnieLdsErrorRead:
-        return "Error de lectura";
+        return "Read error";
     case DnieLdsErrorFormat:
-        return "Fichero con\nformato inesperado";
+        return "File has\nunexpected format";
     case DnieLdsErrorTooBig:
-        return "Fichero demasiado\ngrande";
+        return "File too\nlarge";
     case DnieLdsErrorSink:
-        return "No se pudo guardar\n(hay SD?)";
+        return "Could not save\n(SD card?)";
     }
-    return "Error desconocido";
+    return "Unknown error";
 }

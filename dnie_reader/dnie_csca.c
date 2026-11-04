@@ -156,18 +156,18 @@ const char* dnie_csca_result_str(DnieCscaResult r) {
     case DnieCscaOk:
         return "OK";
     case DnieCscaBadSignature:
-        return "FALSA";
+        return "FAKE";
     case DnieCscaUnknownIssuer:
-        return "emisor desconocido";
+        return "unknown issuer";
     case DnieCscaUnsupported:
-        return "alg. no soportado";
+        return "unsupported alg.";
     case DnieCscaFormat:
-        return "mal formado";
+        return "malformed";
     case DnieCscaNoMemory:
-        return "sin memoria";
+        return "out of memory";
     case DnieCscaKeyNotFound:
-        return "clave no encontrada";
+        return "key not found";
     default:
-        return "no comprobada";
+        return "not checked";
     }
 }

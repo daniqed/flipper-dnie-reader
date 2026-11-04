@@ -1138,5 +1138,5 @@ const char* dnie_j2k_result_str(DnieJ2kResult result) {
     case DnieJ2kErrorTruncated:
         return "JPEG2000 incompleto";
     }
-    return "Error desconocido";
+    return "Unknown error";
 }

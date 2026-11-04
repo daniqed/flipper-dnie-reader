@@ -17,11 +17,11 @@ void dnie_scene_save_menu_on_enter(void* context) {
     DnieApp* app = context;
     Submenu* submenu = app->submenu;
     submenu_reset(submenu);
-    submenu_set_header(submenu, "Guardar lectura");
+    submenu_set_header(submenu, "Save reading");
     submenu_add_item(
-        submenu, "DNI completo (cifrado)", SaveIndexFull, dnie_scene_save_menu_callback, app);
+        submenu, "Full ID (encrypted)", SaveIndexFull, dnie_scene_save_menu_callback, app);
     submenu_add_item(
-        submenu, "Nombre, foto y cumple", SaveIndexAlbum, dnie_scene_save_menu_callback, app);
+        submenu, "Name, photo & birthday", SaveIndexAlbum, dnie_scene_save_menu_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, DnieViewSubmenu);
 }
 
@@ -38,6 +38,7 @@ static DnieStoreResult save_current(DnieApp* app, DnieRecordKind kind) {
         strlcpy(rec->given_names, app->mrz.given_names, sizeof(rec->given_names));
         strlcpy(rec->surnames, app->mrz.surnames, sizeof(rec->surnames));
         dnie_birth_full(app->mrz.birth, rec->birth);
+        strlcpy(rec->issuer, app->mrz.issuer, sizeof(rec->issuer));
     }
     if(app->photo_decode_result == DnieJ2kOk && app->pix_src) {
         rec->has_photo = true;
@@ -58,10 +59,10 @@ bool dnie_scene_save_menu_on_event(void* context, SceneManagerEvent event) {
         save_current(app, event.event == SaveIndexFull ? DnieRecordFull : DnieRecordAlbum);
     if(r == DnieStoreOk) {
         notification_message(app->notifications, &sequence_success);
-        app->pending_toast = event.event == SaveIndexFull ? "DNI guardado" : "Guardado en album";
+        app->pending_toast = event.event == SaveIndexFull ? "ID saved" : "Saved to album";
     } else {
         notification_message(app->notifications, &sequence_error);
-        app->pending_toast = r == DnieStoreErrorFull ? "Lleno (20 max)" : "Error al guardar";
+        app->pending_toast = r == DnieStoreErrorFull ? "Full (20 max)" : "Error saving";
     }
     scene_manager_previous_scene(app->scene_manager); // de vuelta al carnet
     return true;

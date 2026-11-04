@@ -1,5 +1,6 @@
 #include "../dnie_reader.h"
 #include "dnie_reader_scene.h"
+#include "../dnie_sounds.h"
 
 typedef enum {
     SubmenuIndexRead,
@@ -8,6 +9,7 @@ typedef enum {
     SubmenuIndexIdMrz,
     SubmenuIndexSaved,
     SubmenuIndexDelete,
+    SubmenuIndexSettings,
     SubmenuIndexAbout,
 } SubmenuIndex;
 
@@ -18,24 +20,27 @@ static void dnie_scene_start_submenu_callback(void* context, uint32_t index) {
 
 void dnie_scene_start_on_enter(void* context) {
     DnieApp* app = context;
+    dnie_sound_stop(); // por si venimos de un carnet con el himno sonando
     Submenu* submenu = app->submenu;
 
     submenu_reset(submenu);
     submenu_set_header(submenu, "IDentity");
     submenu_add_item(
-        submenu, "DNI espanol", SubmenuIndexRead, dnie_scene_start_submenu_callback, app);
+        submenu, "Spanish ID", SubmenuIndexRead, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Pasaporte", SubmenuIndexPassport, dnie_scene_start_submenu_callback, app);
+        submenu, "Passport", SubmenuIndexPassport, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Otro DNI (con CAN)", SubmenuIndexIdCan, dnie_scene_start_submenu_callback, app);
+        submenu, "Other ID (with CAN)", SubmenuIndexIdCan, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Otro DNI (con MRZ)", SubmenuIndexIdMrz, dnie_scene_start_submenu_callback, app);
+        submenu, "Other ID (with MRZ)", SubmenuIndexIdMrz, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Lecturas guardadas", SubmenuIndexSaved, dnie_scene_start_submenu_callback, app);
+        submenu, "Saved readings", SubmenuIndexSaved, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Borrar fotos de la SD", SubmenuIndexDelete, dnie_scene_start_submenu_callback, app);
+        submenu, "Delete photos from SD", SubmenuIndexDelete, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Acerca de", SubmenuIndexAbout, dnie_scene_start_submenu_callback, app);
+        submenu, "Anthem volume", SubmenuIndexSettings, dnie_scene_start_submenu_callback, app);
+    submenu_add_item(
+        submenu, "About", SubmenuIndexAbout, dnie_scene_start_submenu_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, DnieViewSubmenu);
 }
@@ -61,6 +66,9 @@ bool dnie_scene_start_on_event(void* context, SceneManagerEvent event) {
             storage_simply_remove(storage, DNIE_DG2_PATH);
             furi_record_close(RECORD_STORAGE);
             notification_message(app->notifications, &sequence_success);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSettings) {
+            scene_manager_next_scene(app->scene_manager, DnieSceneSettings);
             consumed = true;
         } else if(event.event == SubmenuIndexAbout) {
             scene_manager_next_scene(app->scene_manager, DnieSceneAbout);

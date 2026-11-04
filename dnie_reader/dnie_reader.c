@@ -44,6 +44,11 @@ static DnieApp* dnie_app_alloc(void) {
     app->can_view = dnie_can_view_alloc(app);
     view_dispatcher_add_view(app->view_dispatcher, DnieViewCan, app->can_view);
 
+    app->settings = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, DnieViewSettings, variable_item_list_get_view(app->settings));
+    dnie_sound_volume_load();
+
     app->widget = widget_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, DnieViewWidget, widget_get_view(app->widget));
@@ -61,6 +66,7 @@ static void dnie_app_free(DnieApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, DnieViewSubmenu);
     view_dispatcher_remove_view(app->view_dispatcher, DnieViewCan);
     view_dispatcher_remove_view(app->view_dispatcher, DnieViewWidget);
+    view_dispatcher_remove_view(app->view_dispatcher, DnieViewSettings);
     view_dispatcher_remove_view(app->view_dispatcher, DnieViewCard);
     view_free(app->card_view);
     if(app->toast_timer) {
@@ -77,6 +83,7 @@ static void dnie_app_free(DnieApp* app) {
     submenu_free(app->submenu);
     view_free(app->can_view);
     widget_free(app->widget);
+    variable_item_list_free(app->settings);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);

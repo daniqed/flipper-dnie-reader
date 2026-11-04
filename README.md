@@ -24,7 +24,8 @@ A [Flipper Zero](https://flipperzero.one) app that reads **electronic identity d
   - **Chip Authentication** (detects cloned chips).
   - Full-screen **"NOT AUTHENTIC"** warning when something does not match.
 - **Sounds**: the issuing country's **national anthem** when the document is genuine, a low "wah-wah" when it is not. The music stops immediately when you leave the app.
-- **Saved readings**, encrypted with the Flipper's unique enclave key. Two modes: full document, or *album* (name, photo and birthday only).
+- **Saved readings**, encrypted with the Flipper's unique enclave key. Two modes: full document, or *album* (name, photo, birthday and country only). Opening a saved reading plays its country's anthem.
+- **English interface**, with an anthem volume setting (Off, 25-100 %).
 
 ## Supported documents
 
@@ -49,10 +50,10 @@ For countries other than Spain, a signature that does not match any bundled key 
 
 | Seal | Meaning |
 |---|---|
-| **ORIGINAL** | Hashes + signature + CSCA chain + Chip Authentication |
-| **DATOS OK** | Hashes + signature + CSCA chain; the chip does not support Chip Authentication |
+| **GENUINE** | Hashes + signature + CSCA chain + Chip Authentication |
+| **DATA OK** | Hashes + signature + CSCA chain; the chip does not support Chip Authentication |
 | **SOD OK** | Hashes match, but the chain could not be checked |
-| **ALTER / FIRMA! / CSCA! / CA FALLA** | Something does not match: do not trust the document |
+| **TAMPER / SIG! / CSCA! / CA FAIL** | Something does not match: do not trust the document |
 
 ### Anthems
 

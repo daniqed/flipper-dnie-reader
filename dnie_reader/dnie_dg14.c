@@ -127,7 +127,7 @@ const char* dnie_curve_name(DnieCurve c) {
     case DnieCurveNistP256:
         return "NIST P-256";
     case DnieCurveExplicit:
-        return "explicita";
+        return "explicit";
     default:
         return "?";
     }

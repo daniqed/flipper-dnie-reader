@@ -18,14 +18,14 @@ void dnie_scene_warning_on_enter(void* context) {
     Widget* w = app->widget;
     widget_reset(w);
     widget_add_frame_element(w, 0, 0, 128, 51, 3);
-    widget_add_string_element(w, 64, 3, AlignCenter, AlignTop, FontPrimary, "!! NO AUTENTICO !!");
+    widget_add_string_element(w, 64, 3, AlignCenter, AlignTop, FontPrimary, "!! NOT GENUINE !!");
     const char* reason = dnie_verdict_reason(&app->auth);
     widget_add_string_multiline_element(
-        w, 64, 17, AlignCenter, AlignTop, FontSecondary, reason ? reason : "Comprobacion fallida");
+        w, 64, 17, AlignCenter, AlignTop, FontSecondary, reason ? reason : "Check failed");
     widget_add_string_element(
-        w, 64, 40, AlignCenter, AlignTop, FontSecondary, "No te fies de este doc.");
-    widget_add_button_element(w, GuiButtonTypeLeft, "Salir", warning_button, app);
-    widget_add_button_element(w, GuiButtonTypeRight, "Ver", warning_button, app);
+        w, 64, 40, AlignCenter, AlignTop, FontSecondary, "Don't trust this doc.");
+    widget_add_button_element(w, GuiButtonTypeLeft, "Exit", warning_button, app);
+    widget_add_button_element(w, GuiButtonTypeRight, "View", warning_button, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, DnieViewWidget);
 }
 

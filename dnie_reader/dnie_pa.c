@@ -389,16 +389,16 @@ const char* dnie_pa_result_str(DniePaResult r) {
     case DniePaOk:
         return "OK";
     case DniePaBadSignature:
-        return "NO VALIDA";
+        return "INVALID";
     case DniePaNoCert:
-        return "sin certificado";
+        return "no certificate";
     case DniePaUnsupported:
-        return "alg. no soportado";
+        return "unsupported alg.";
     case DniePaFormat:
-        return "mal formada";
+        return "malformed";
     case DniePaNoMemory:
-        return "sin memoria";
+        return "out of memory";
     default:
-        return "no comprobada";
+        return "not checked";
     }
 }

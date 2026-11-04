@@ -13,15 +13,15 @@
  */
 
 static const char* const DNIE_STEP_NAMES[] = {
-    "Leyendo EF.CardAccess",
-    "1/4 Nonce cifrado",
-    "2/4 Mapeo (ECC)",
+    "Reading EF.CardAccess",
+    "1/4 Encrypted nonce",
+    "2/4 Mapping (ECC)",
     "3/4 ECDH (ECC)",
     "4/4 Tokens",
-    "Leyendo DG1 (cifrado)",
-    "Comprobando SOD/DG14",
-    "Foto (DG2)",
-    "Autenticando chip",
+    "Reading DG1 (encrypted)",
+    "Checking SOD/DG14",
+    "Photo (DG2)",
+    "Authenticating chip",
 };
 #define DNIE_READ_STEPS 8
 #define DNIE_STEP_PHOTO 7 // muestra el porcentaje
@@ -33,7 +33,7 @@ static void dnie_scene_read_draw(DnieApp* app) {
 
     widget_reset(widget);
     widget_add_string_element(
-        widget, 64, 2, AlignCenter, AlignTop, FontPrimary, step == 0 ? (app->foreign_id ? "Acerca el documento" : app->passport ? "Acerca el pasaporte" : "Acerca el DNIe") : (step <= DNIE_PACE_STEPS ? "PACE en curso" : "Canal seguro OK"));
+        widget, 64, 2, AlignCenter, AlignTop, FontPrimary, step == 0 ? (app->foreign_id ? "Hold the document" : app->passport ? "Hold the passport" : "Hold the ID") : (step <= DNIE_PACE_STEPS ? "PACE in progress" : "Secure channel OK"));
     widget_add_string_multiline_element(
         widget,
         64,
@@ -41,7 +41,7 @@ static void dnie_scene_read_draw(DnieApp* app) {
         AlignCenter,
         AlignTop,
         FontSecondary,
-        step ? "No lo muevas,\npuede tardar unos\nsegundos" : (app->passport && !app->foreign_id ? "(pagina de la foto)\na la parte trasera\ndel Flipper" : "a la parte trasera\ndel Flipper y no\nlo muevas"));
+        step ? "Don't move it,\nthis may take a\nfew seconds" : (app->passport && !app->foreign_id ? "(photo page)\nto the back of\nthe Flipper" : "to the back of the\nFlipper; don't\nmove it"));
     if(step == DNIE_STEP_PHOTO) {
         char line[32];
         snprintf(line, sizeof(line), "%s: %u%%", DNIE_STEP_NAMES[step], app->photo_percent);
@@ -228,7 +228,7 @@ void dnie_scene_read_on_enter(void* context) {
     dnie_auth_reset(&app->auth);
     app->photo_decode_result = DnieJ2kErrorFormat;
     memset(&app->pix, 0, sizeof(app->pix));
-    app->photo.lds.result = DnieLdsErrorTransport; // "no leida" hasta que se lea
+    app->photo.lds.result = DnieLdsErrorTransport; // "not read" hasta que se lea
     app->read_result = DnieCardErrorTransport;
     app->pace_result = DniePaceErrorTransport;
     memset(&app->pace, 0, sizeof(app->pace));
@@ -289,7 +289,7 @@ bool dnie_scene_read_on_event(void* context, SceneManagerEvent event) {
                     app->notifications,
                     event.event == DnieCustomEventReadOk ? &sequence_success : &sequence_error);
             }
-            app->card_hint_pending = card; // en el carnet: "Arriba: guardar"
+            app->card_hint_pending = card; // en el carnet: "Up: save"
             scene_manager_next_scene(
                 app->scene_manager,
                 !card                 ? DnieSceneResult :

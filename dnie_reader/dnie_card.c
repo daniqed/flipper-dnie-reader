@@ -156,15 +156,15 @@ const char* dnie_card_result_str(DnieCardResult result) {
     case DnieCardOk:
         return "OK";
     case DnieCardErrorTransport:
-        return "Error de radio\n(no muevas el DNI)";
+        return "Radio error\n(don't move the ID)";
     case DnieCardErrorSelect:
-        return "El chip rechazo\nEF.CardAccess";
+        return "Chip rejected\nEF.CardAccess";
     case DnieCardErrorRead:
-        return "Error en READ BINARY";
+        return "READ BINARY error";
     case DnieCardErrorFormat:
-        return "Formato inesperado\n(no es SET 0x31)";
+        return "Unexpected format\n(not SET 0x31)";
     case DnieCardErrorTooBig:
-        return "EF.CardAccess\ndemasiado grande";
+        return "EF.CardAccess\ntoo large";
     }
-    return "Error desconocido";
+    return "Unknown error";
 }
