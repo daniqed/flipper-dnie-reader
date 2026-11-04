@@ -6,7 +6,6 @@ sourcecode:
     origin: https://github.com/daniqed/flipper-identity.git
     commit_sha: PEGA_AQUI_EL_SHA_DEL_COMMIT
     subdir: dnie_reader
-short_description: Read eIDs and ePassports and verify that they are genuine
 description: "@./docs/README.md"
 changelog: "@./docs/changelog.md"
 screenshots:

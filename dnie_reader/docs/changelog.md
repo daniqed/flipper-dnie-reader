@@ -1,3 +1,7 @@
+## 0.22
+- Rename saved readings: hold OK on a saved reading; the name you type replaces the document's name and surnames.
+- Demo mode with a fictitious sample ID, for screenshots.
+
 ## 0.21
 - First catalog release.
 - Spanish eID (PACE with CAN), ePassports (PACE or BAC with MRZ) and ICAO national ID cards.
