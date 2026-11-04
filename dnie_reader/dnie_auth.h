@@ -76,6 +76,9 @@ void dnie_auth_compact(DnieAuth* a);
 // Todo verificado: hashes + firma del SOD + Chip Authentication
 bool dnie_auth_all_ok(const DnieAuth* a);
 
+// Datos autenticos (hashes + firma + CSCA) aunque el chip no se haya podido comprobar
+bool dnie_auth_data_ok(const DnieAuth* a);
+
 // true si todo lo comprobado coincide (y se pudo comprobar algo)
 bool dnie_auth_integrity_ok(const DnieAuth* a);
 bool dnie_auth_integrity_failed(const DnieAuth* a);

@@ -7,9 +7,9 @@ static int fails;
 static void check(const char* what, const uint8_t* der, size_t len, DnieCscaResult want, const char* name) {
     DerIt it = der_it(der, len); DerTlv cert;
     DnieCscaInfo info;
-    DnieCscaResult r = der_expect(&it, 0x30, &cert) ? dnie_csca_verify_cert(&cert, &info) : DnieCscaFormat;
-    int ok = r == want && (!name || (info.csca_name && strcmp(info.csca_name, name) == 0));
-    printf("%s %s: %s (%s)\n", ok ? "OK  " : "FAIL", what, dnie_csca_result_str(r), info.csca_name ? info.csca_name : "-");
+    DnieCscaResult r = der_expect(&it, 0x30, &cert) ? dnie_csca_verify_cert(&cert, NULL, NULL, &info) : DnieCscaFormat;
+    int ok = r == want && (!name || strcmp(info.csca_name, name) == 0);
+    printf("%s %s: %s (%s)\n", ok ? "OK  " : "FAIL", what, dnie_csca_result_str(r), info.csca_name[0] ? info.csca_name : "-");
     if(!ok) fails++;
 }
 int main(void) {

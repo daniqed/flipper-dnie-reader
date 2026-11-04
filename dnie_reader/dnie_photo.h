@@ -43,3 +43,7 @@ DnieLdsResult dnie_photo_read_dg2(
 // Busca la imagen dentro de DG2, la guarda como foto.jp2 / foto.jpg y analiza su cabecera.
 // Borra dg2.bin al terminar. Llamar desde el hilo de la GUI.
 bool dnie_photo_extract(DniePhoto* photo);
+
+// Borra de la SD la foto en claro (dg2.bin, foto.jp2, foto.jpg). Se llama en cuanto la foto
+// se ha convertido en pixel art y al salir de la app: solo queda la copia cifrada que guardes.
+void dnie_photo_wipe(void);

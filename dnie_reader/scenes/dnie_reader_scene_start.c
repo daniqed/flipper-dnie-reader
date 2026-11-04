@@ -27,7 +27,7 @@ void dnie_scene_start_on_enter(void* context) {
     submenu_add_item(
         submenu, "Lecturas guardadas", SubmenuIndexSaved, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Borrar foto (jp2) SD", SubmenuIndexDelete, dnie_scene_start_submenu_callback, app);
+        submenu, "Borrar fotos de la SD", SubmenuIndexDelete, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
         submenu, "Acerca de", SubmenuIndexAbout, dnie_scene_start_submenu_callback, app);
 

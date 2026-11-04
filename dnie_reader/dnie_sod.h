@@ -35,6 +35,7 @@ typedef struct {
     DerTlv signed_attrs; // [0] IMPLICIT; para verificar la firma se re-etiqueta como SET (0x31)
     char sig_alg[48]; // nombre legible
     DerTlv sig_alg_oid;
+    DerTlv sig_alg_seq; // AlgorithmIdentifier completo
     DerTlv signature;
 
     // Certificado del firmante (Document Signer)

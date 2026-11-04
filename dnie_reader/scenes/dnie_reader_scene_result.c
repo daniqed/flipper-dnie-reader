@@ -51,6 +51,9 @@ static void cat_auth(DnieApp* app, FuriString* text) {
             furi_string_cat_str(text, "!! CHIP AUTH FALLA !!\n");
         } else if(dnie_auth_all_ok(a)) {
             furi_string_cat_str(text, "DOCUMENTO ORIGINAL\n(hashes + firma +\nCSCA SPAIN + chip)\n");
+        } else if(dnie_auth_data_ok(a)) {
+            furi_string_cat_str(
+                text, "DATOS AUTENTICOS\n(hashes + firma +\nCSCA; el chip no\nadmite Chip Auth)\n");
         } else if(dnie_auth_integrity_ok(a)) {
             furi_string_cat_str(text, "Hashes del SOD: OK\n");
         }
@@ -76,7 +79,7 @@ static void cat_auth(DnieApp* app, FuriString* text) {
         if(a->has_cert) {
             furi_string_cat_printf(text, "DS: %s\nEmisor: %s\n", a->ds_subject_cn, a->ds_issuer_cn);
             furi_string_cat_printf(text, "Cadena CSCA: %s\n", dnie_csca_result_str(a->csca.result));
-            if(a->csca.csca_name) furi_string_cat_printf(text, "(%s)\n", a->csca.csca_name);
+            if(a->csca.csca_name[0]) furi_string_cat_printf(text, "(%s)\n", a->csca.csca_name);
         }
     }
 
@@ -157,7 +160,7 @@ static void cat_photo(DnieApp* app, FuriString* text) {
         (unsigned)((p->dg2.image_len + 512) / 1024));
     if(p->saved) {
         furi_string_cat_printf(
-            text, ", guardada en SD:\napps_data/dnie_reader/\n%s\n", strrchr(p->path, '/') + 1);
+            text, ", borrada de la SD\ntras pasarla a pixel\nart (privacidad)\n");
     } else {
         furi_string_cat_str(text, "\nNo se pudo guardar\n");
     }

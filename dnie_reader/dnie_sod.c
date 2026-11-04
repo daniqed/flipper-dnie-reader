@@ -157,6 +157,7 @@ static bool parse_signer_info(const DerTlv* si, DnieSod* out) {
     }
     if(!alg_oid(&f, &oid)) return false; // signatureAlgorithm
     out->sig_alg_oid = oid;
+    out->sig_alg_seq = f; // con los parametros (RSA-PSS)
     sig_alg_name(&oid, out->sig_alg, sizeof(out->sig_alg));
     return der_expect(&s, 0x04, &out->signature);
 }

@@ -61,7 +61,8 @@ Consulta `tests/README.md`.
 | `dnie_lds.c`, `dnie_mrz.c` | Lectura de ficheros del chip, parser de la MRZ |
 | `dnie_j2k.c`, `dnie_pixelart.c` | Decodificador JPEG2000 reducido, pixel art |
 | `dnie_sod.c`, `dnie_pa.c`, `dnie_dg14.c`, `dnie_ca.c` | Autenticidad: SOD, firma, Chip Authentication |
-| `dnie_csca.c`, `dnie_csca_keys.inc` | Cadena de confianza: certificado DS firmado por CSCA SPAIN (claves públicas de la Master List del BSI) |
+| `dnie_csca.c`, `dnie_csca_keys.inc`, `assets/csca.bin` | Cadena de confianza: CSCA SPAIN dentro de la app y las de los 20 países principales en la SD (Master List del BSI). RSA PKCS#1 y RSA-PSS |
+| `dnie_bac.c`, `dnie_jpeg.c` | Pasaporte: BAC y foto JPEG |
 | `dnie_store.c`, `dnie_record.c` | Lecturas guardadas cifradas |
 | `scenes/` | Pantallas de la app |
 

@@ -1,4 +1,5 @@
 #include "../dnie_reader.h"
+#include "../dnie_jpeg.h"
 #include "dnie_reader_scene.h"
 
 #include <furi_hal_rtc.h>
@@ -59,9 +60,60 @@ static uint8_t* read_prefix(const char* path, size_t want, size_t* got, size_t* 
     return buf;
 }
 
+// JPEG (pasaportes): se decodifica a 1/8 leyendo de la SD a trozos
+static size_t card_file_read(void* ctx, uint8_t* buf, size_t max) {
+    return storage_file_read((File*)ctx, buf, max);
+}
+
+static void card_photo_to_pixelart(DnieApp* app, DnieGrayImage* gray) {
+    app->photo_decoded_w = gray->width;
+    app->photo_decoded_h = gray->height;
+    app->photo_reduce = gray->reduce;
+    if(!app->pix_src) app->pix_src = malloc(sizeof(DniePixelSource));
+    bool ok = app->pix_src &&
+              dnie_pixelart_prepare(
+                  gray->pixels, gray->width, gray->height, CARD_PHOTO_MAX_W, CARD_PHOTO_MAX_H, app->pix_src) &&
+              dnie_pixelart_dither(app->pix_src, app->dither, &app->pix);
+    dnie_gray_free(gray);
+    if(!ok) app->photo_decode_result = DnieJ2kErrorMemory;
+}
+
+static void card_decode_jpeg(DnieApp* app) {
+    // ~1.5 KB de estado + la imagen a 1/8 (unos 4 KB en una foto de pasaporte)
+    if(memmgr_get_free_heap() < 8192 + CARD_HEAP_MARGIN ||
+       memmgr_heap_get_max_free_block() < 6144) {
+        app->photo_decode_result = DnieJ2kErrorMemory;
+        return;
+    }
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* f = storage_file_alloc(storage);
+    if(storage_file_open(f, app->photo.path, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        DnieGrayImage gray;
+        uint32_t t0 = furi_get_tick();
+        app->photo_decode_result = dnie_jpeg_decode_dc(card_file_read, f, &gray);
+        FURI_LOG_I(TAG, "JPEG: %d en %lu ms", app->photo_decode_result, furi_get_tick() - t0);
+        storage_file_close(f);
+        if(app->photo_decode_result == DnieJ2kOk) card_photo_to_pixelart(app, &gray);
+    }
+    storage_file_free(f);
+    furi_record_close(RECORD_STORAGE);
+}
+
+static void card_decode_photo_inner(DnieApp* app);
+
 static void card_decode_photo(DnieApp* app) {
+    card_decode_photo_inner(app);
+    // Privacidad: la foto a resolucion completa no se queda en la SD sin cifrar
+    if(app->photo.saved) dnie_photo_wipe();
+}
+
+static void card_decode_photo_inner(DnieApp* app) {
     app->photo_decode_tried = true;
     app->photo_decode_result = DnieJ2kErrorFormat;
+    if(app->photo.saved && app->photo.dg2.image_type == DnieImageJpeg && app->photo.path) {
+        card_decode_jpeg(app);
+        return;
+    }
     if(!app->photo.saved || app->photo.dg2.image_type != DnieImageJpeg2000 || !app->photo.j2k_ok)
         return;
 
@@ -102,20 +154,7 @@ static void card_decode_photo(DnieApp* app) {
             if(r == DnieJ2kErrorTruncated && got < file_size) continue; // pedir mas bytes
             if(r != DnieJ2kOk) return;
 
-            app->photo_decoded_w = gray.width;
-            app->photo_decoded_h = gray.height;
-            app->photo_reduce = gray.reduce;
-            if(!app->pix_src) app->pix_src = malloc(sizeof(DniePixelSource));
-            bool ok = dnie_pixelart_prepare(
-                          gray.pixels,
-                          gray.width,
-                          gray.height,
-                          CARD_PHOTO_MAX_W,
-                          CARD_PHOTO_MAX_H,
-                          app->pix_src) &&
-                      dnie_pixelart_dither(app->pix_src, app->dither, &app->pix);
-            dnie_gray_free(&gray);
-            if(!ok) app->photo_decode_result = DnieJ2kErrorMemory;
+            card_photo_to_pixelart(app, &gray);
             return;
         }
     }
@@ -255,6 +294,7 @@ static void card_draw(Canvas* canvas, void* model) {
                                 app->auth.csca.result == DnieCscaBadSignature ? "CSCA!" :
                                 app->auth.ca.result == DnieCaFailed      ? "CA FALLA" :
                                 dnie_auth_all_ok(&app->auth)              ? "ORIGINAL" :
+                                dnie_auth_data_ok(&app->auth)             ? "DATOS OK" :
                                 dnie_auth_integrity_ok(&app->auth)        ? "SOD OK" :
                                                                             NULL;
             if(badge) {

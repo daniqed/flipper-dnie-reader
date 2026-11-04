@@ -40,4 +40,21 @@ DniePaResult dnie_pa_rsa_pkcs1_verify(
     const uint8_t* sig,
     size_t sig_len);
 
+// RSASSA-PSS (EMSA-PSS-VERIFY, RFC 8017 9.1.2) con MGF1 del mismo hash.
+// salt_len < 0: se acepta cualquier longitud de sal.
+DniePaResult dnie_pa_rsa_pss_verify(
+    const uint8_t* n,
+    size_t n_len,
+    const uint8_t* e,
+    size_t e_len,
+    DnieHashAlg alg,
+    const uint8_t* hash,
+    const uint8_t* sig,
+    size_t sig_len,
+    int salt_len);
+
+// AlgorithmIdentifier de una firma RSA -> hash y si es PSS (con su sal).
+// false si no es RSA o el hash no es SHA-1/224/256/384/512.
+bool dnie_pa_rsa_sig_alg(const DerTlv* alg_seq, DnieHashAlg* hash, bool* pss, int* salt_len);
+
 const char* dnie_pa_result_str(DniePaResult r);

@@ -69,3 +69,11 @@ con ChipAuthenticationInfo/PublicKeyInfo. Necesita `pip install asn1crypto crypt
 - `test_bac.c`: BAC con el ejemplo resuelto de ICAO 9303-11 apendice D.3 (chip simulado con
   los stubs de `stub/`): E_IFD, M_IFD, KSenc, KSmac y SSC byte a byte.
 - `test_td3.c`: MRZ de pasaporte (TD3) con el especimen de ICAO y deteccion de manipulacion.
+- `test_jpeg.c`: decodificador JPEG a 1/8 (fotos de pasaporte) comparado con libjpeg
+  (Pillow `draft`, que usa el mismo escalado DCT 1/8): 4:2:0, 4:4:4, 4:2:2 con marcadores
+  de reinicio y gris salen identicos pixel a pixel; el progresivo se rechaza.
+  Imagenes sinteticas generadas con `gen_jpeg_vectors.py`.
+- `test_csca_world.c`: cadena CSCA de otros paises. Los 68 certificados CSCA vigentes de los
+  20 paises principales (`top_certs.bin`, publicos, de la Master List del BSI) se verifican
+  contra `assets/csca.bin`: 49 OK (17 con RSA-PSS), los ECDSA/SHA-512 salen "no soportado" y
+  ninguno manipulado se acepta. `gen_csca_bin.py` genera `csca.bin`.

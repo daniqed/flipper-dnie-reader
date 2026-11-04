@@ -241,6 +241,7 @@ void dnie_scene_read_on_enter(void* context) {
     // LED cian parpadeando mientras buscamos, como la app NFC oficial
     notification_message(app->notifications, &sequence_blink_start_cyan);
 
+    dnie_sound_stop(); // por si sigue sonando el himno de la lectura anterior
     app->used_bac = false;
     app->bac_result = DnieBacOk;
     // Primero detectar el tipo de chip (DNIe: 4B; pasaportes: 4A o 4B)
@@ -277,12 +278,17 @@ bool dnie_scene_read_on_event(void* context, SceneManagerEvent event) {
             DnieVerdict v = card ? dnie_verdict(&app->auth) : DnieVerdictUnknown;
             // Original: Marcha Real. No autentico: sonido grave + vibracion larga.
             // Sin veredicto: pitido normal (exito) o de error, como el NFC.
-            const NotificationSequence* snd =
-                v == DnieVerdictOriginal ? dnie_sound_original() :
-                v == DnieVerdictFake     ? dnie_sound_fake() :
-                event.event == DnieCustomEventReadOk ? &sequence_success :
-                                                       &sequence_error;
-            notification_message(app->notifications, snd);
+            // Autentico: himno del pais. No autentico: sonido grave + vibracion larga.
+            // Sin veredicto: pitido normal (exito) o de error, como el NFC.
+            if(v == DnieVerdictOriginal || v == DnieVerdictGenuine) {
+                dnie_sound_original(app->notifications, app->mrz.issuer);
+            } else if(v == DnieVerdictFake) {
+                dnie_sound_fake(app->notifications);
+            } else {
+                notification_message(
+                    app->notifications,
+                    event.event == DnieCustomEventReadOk ? &sequence_success : &sequence_error);
+            }
             app->card_hint_pending = card; // en el carnet: "Arriba: guardar"
             scene_manager_next_scene(
                 app->scene_manager,

@@ -115,3 +115,11 @@ bool dnie_photo_extract(DniePhoto* photo) {
     furi_record_close(RECORD_STORAGE);
     return photo->saved;
 }
+
+void dnie_photo_wipe(void) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_remove(storage, DNIE_DG2_PATH);
+    storage_simply_remove(storage, DNIE_PHOTO_J2K_PATH);
+    storage_simply_remove(storage, DNIE_PHOTO_JPG_PATH);
+    furi_record_close(RECORD_STORAGE);
+}

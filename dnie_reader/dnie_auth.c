@@ -1,4 +1,5 @@
 #include "dnie_auth.h"
+#include <storage/storage.h>
 
 #include <string.h>
 
@@ -16,6 +17,10 @@ static bool mem_sink(const uint8_t* data, size_t len, void* context) {
     memcpy(&m->buf[m->len], data, len);
     m->len += len;
     return true;
+}
+
+static size_t csca_file_read(void* ctx, uint8_t* buf, size_t len) {
+    return storage_file_read((File*)ctx, buf, len);
 }
 
 void dnie_auth_reset(DnieAuth* a) {
@@ -113,7 +118,14 @@ void dnie_auth_read(
     if(a->sod->has_cert) {
         t0 = furi_get_tick();
         if(memmgr_get_free_heap() > 16384 && memmgr_heap_get_max_free_block() > 6144) {
-            dnie_csca_verify_cert(&a->sod->cert, &a->csca);
+            // CSCA de otros paises: fichero de assets en la SD
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            File* f = storage_file_alloc(storage);
+            bool open = storage_file_open(f, APP_ASSETS_PATH("csca.bin"), FSAM_READ, FSOM_OPEN_EXISTING);
+            dnie_csca_verify_cert(&a->sod->cert, open ? csca_file_read : NULL, f, &a->csca);
+            if(open) storage_file_close(f);
+            storage_file_free(f);
+            furi_record_close(RECORD_STORAGE);
         } else {
             a->csca.result = DnieCscaNoMemory;
         }
@@ -173,6 +185,11 @@ void dnie_auth_compact(DnieAuth* a) {
 bool dnie_auth_all_ok(const DnieAuth* a) {
     return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk &&
            a->csca.result == DnieCscaOk && a->ca.result == DnieCaOk;
+}
+
+bool dnie_auth_data_ok(const DnieAuth* a) {
+    return dnie_auth_integrity_ok(a) && a->pa.result == DniePaOk &&
+           a->csca.result == DnieCscaOk && a->ca.result != DnieCaFailed;
 }
 
 bool dnie_auth_integrity_failed(const DnieAuth* a) {
