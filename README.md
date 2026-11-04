@@ -1,4 +1,4 @@
-# DNIe Reader para Flipper Zero
+# IDentity (antes DNIe Reader) para Flipper Zero
 
 App para [Flipper Zero](https://flipperzero.one) que lee el **DNI electrónico español (DNIe 3.0/4.0)** por NFC, muestra un "carnet" con la foto en pixel art y **verifica que el documento es auténtico**.
 
@@ -45,6 +45,14 @@ La carpeta `tests/` contiene pruebas en PC, con vectores oficiales siempre que e
 - **Cadena CSCA SPAIN**: con certificados reales y públicos de la Policía.
 
 Consulta `tests/README.md`.
+
+## Documentos
+
+- **DNI español**: PACE con el CAN (6 cifras del anverso).
+- **Pasaportes** de cualquier país (estándar ICAO): PACE o BAC con los datos de la MRZ.
+- **DNI de otros países** que sigan el estándar ICAO: con su CAN o con su MRZ, según la tarjeta.
+  Solo el acceso estándar con los datos impresos en el propio documento. Las tarjetas que
+  exigen un terminal autorizado (por ejemplo, el DNI alemán) no son compatibles.
 
 ## Privacidad
 

@@ -313,7 +313,7 @@ void dnie_scene_result_on_enter(void* context) {
         if(app->pace_result == DniePaceErrorWrongCan) {
             furi_string_cat_str(
                 text,
-                app->passport ? "Revisa el numero de\npasaporte y las fechas\n" :
+                app->passport ? "Revisa el numero de\ndocumento y las fechas\n" :
                                 "Revisa los 6 digitos\ndel anverso\n");
         }
         cat_technical(app, text);

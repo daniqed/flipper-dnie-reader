@@ -4,6 +4,8 @@
 typedef enum {
     SubmenuIndexRead,
     SubmenuIndexPassport,
+    SubmenuIndexIdCan,
+    SubmenuIndexIdMrz,
     SubmenuIndexSaved,
     SubmenuIndexDelete,
     SubmenuIndexAbout,
@@ -19,11 +21,15 @@ void dnie_scene_start_on_enter(void* context) {
     Submenu* submenu = app->submenu;
 
     submenu_reset(submenu);
-    submenu_set_header(submenu, "DNIe Reader");
+    submenu_set_header(submenu, "IDentity");
     submenu_add_item(
-        submenu, "Leer DNIe", SubmenuIndexRead, dnie_scene_start_submenu_callback, app);
+        submenu, "DNI espanol", SubmenuIndexRead, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
-        submenu, "Leer pasaporte", SubmenuIndexPassport, dnie_scene_start_submenu_callback, app);
+        submenu, "Pasaporte", SubmenuIndexPassport, dnie_scene_start_submenu_callback, app);
+    submenu_add_item(
+        submenu, "Otro DNI (con CAN)", SubmenuIndexIdCan, dnie_scene_start_submenu_callback, app);
+    submenu_add_item(
+        submenu, "Otro DNI (con MRZ)", SubmenuIndexIdMrz, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
         submenu, "Lecturas guardadas", SubmenuIndexSaved, dnie_scene_start_submenu_callback, app);
     submenu_add_item(
@@ -39,8 +45,10 @@ bool dnie_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexRead || event.event == SubmenuIndexPassport) {
-            app->passport = event.event == SubmenuIndexPassport;
+        if(event.event == SubmenuIndexRead || event.event == SubmenuIndexPassport ||
+           event.event == SubmenuIndexIdCan || event.event == SubmenuIndexIdMrz) {
+            app->passport = event.event == SubmenuIndexPassport || event.event == SubmenuIndexIdMrz;
+            app->foreign_id = event.event == SubmenuIndexIdCan || event.event == SubmenuIndexIdMrz;
             scene_manager_next_scene(app->scene_manager, DnieSceneCanInput);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {

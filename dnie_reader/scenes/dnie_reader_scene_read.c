@@ -33,7 +33,7 @@ static void dnie_scene_read_draw(DnieApp* app) {
 
     widget_reset(widget);
     widget_add_string_element(
-        widget, 64, 2, AlignCenter, AlignTop, FontPrimary, step == 0 ? (app->passport ? "Acerca el pasaporte" : "Acerca el DNIe") : (step <= DNIE_PACE_STEPS ? "PACE en curso" : "Canal seguro OK"));
+        widget, 64, 2, AlignCenter, AlignTop, FontPrimary, step == 0 ? (app->foreign_id ? "Acerca el documento" : app->passport ? "Acerca el pasaporte" : "Acerca el DNIe") : (step <= DNIE_PACE_STEPS ? "PACE en curso" : "Canal seguro OK"));
     widget_add_string_multiline_element(
         widget,
         64,
@@ -41,7 +41,7 @@ static void dnie_scene_read_draw(DnieApp* app) {
         AlignCenter,
         AlignTop,
         FontSecondary,
-        step ? "No lo muevas,\npuede tardar unos\nsegundos" : (app->passport ? "(pagina de la foto)\na la parte trasera\ndel Flipper" : "a la parte trasera\ndel Flipper y no\nlo muevas"));
+        step ? "No lo muevas,\npuede tardar unos\nsegundos" : (app->passport && !app->foreign_id ? "(pagina de la foto)\na la parte trasera\ndel Flipper" : "a la parte trasera\ndel Flipper y no\nlo muevas"));
     if(step == DNIE_STEP_PHOTO) {
         char line[32];
         snprintf(line, sizeof(line), "%s: %u%%", DNIE_STEP_NAMES[step], app->photo_percent);

@@ -69,7 +69,8 @@ typedef struct {
     char can[DNIE_CAN_BUFFER_SIZE]; // CAN introducido por el usuario
 
     // Pasaporte: la clave sale de la MRZ (n de pasaporte + nacimiento + caducidad)
-    bool passport;
+    bool passport; // la clave sale de la MRZ (pasaporte o DNI extranjero con MRZ)
+    bool foreign_id; // DNI de otro pais (textos genericos)
     char pass_number[10]; // A-Z/0-9
     char pass_birth[7]; // AAMMDD
     char pass_expiry[7]; // AAMMDD

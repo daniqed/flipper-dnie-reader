@@ -143,16 +143,16 @@ static void fill_model(DnieApp* app, InputModel* m) {
     switch(app->input_field) {
     case DnieInputCan:
         m->len = DNIE_CAN_LENGTH;
-        m->title = "CAN del DNI";
-        m->hint = "6 cifras del anverso";
+        m->title = app->foreign_id ? "CAN del documento" : "CAN del DNI";
+        m->hint = app->foreign_id ? "6 cifras impresas" : "6 cifras del anverso";
         for(int i = 0; i < m->len; i++)
             m->chars[i] = strlen(app->can) == DNIE_CAN_LENGTH ? app->can[i] : '0';
         break;
     case DnieInputPassNumber: {
         m->len = 9;
         m->alnum = true;
-        m->title = "N. de pasaporte";
-        m->hint = "Ej: PAA123456";
+        m->title = app->foreign_id ? "N. de documento" : "N. de pasaporte";
+        m->hint = app->foreign_id ? "El de la MRZ" : "Ej: PAA123456";
         size_t n = strlen(app->pass_number);
         for(int i = 0; i < m->len; i++) m->chars[i] = i < (int)n ? app->pass_number[i] : '<';
         if(n == 0) memcpy(m->chars, "PAA000000", 9);
