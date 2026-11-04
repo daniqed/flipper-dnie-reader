@@ -341,9 +341,12 @@ DniePaceResult dnie_pace_establish(
             break;
         }
         if(state->sw != SW_OK) {
-            // 63xx: autenticacion fallida -> el CAN no coincide
-            result = ((state->sw & 0xFF00) == 0x6300) ? DniePaceErrorWrongCan :
-                                                        DniePaceErrorKeyAgreement;
+            // El chip no acepta nuestro token: 63xx (autenticacion fallida) o 6988 (objetos SM
+            // incorrectos, lo que devuelven algunos pasaportes). Las dos cosas significan que
+            // la contrasena (CAN o datos de la MRZ) no coincide.
+            result = ((state->sw & 0xFF00) == 0x6300 || state->sw == 0x6988) ?
+                         DniePaceErrorWrongCan :
+                         DniePaceErrorChipToken;
             break;
         }
         if(!found) {
